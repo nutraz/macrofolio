@@ -9,9 +9,18 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     emptyOutDir: true,
+    chunkSizeWarningLimit: 700,
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, 'index.html'),
+      },
+      output: {
+        manualChunks: {
+          react: ['react', 'react-dom'],
+          ethers: ['ethers'],
+          supabase: ['@supabase/supabase-js'],
+          recharts: ['recharts'],
+        },
       },
     },
   },

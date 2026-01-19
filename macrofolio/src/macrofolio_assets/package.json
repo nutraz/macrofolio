@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "audit": "npm audit --json > audit-report.json || true",
+    "audit:check": "npm audit --json > audit-report.json 2>&1; if grep -q '\"severity\":\"critical\"' audit-report.json; then echo 'Critical vulnerabilities found, failing build.'; rm -f audit-report.json; exit 1; fi; if grep -q '\"severity\":\"high\"' audit-report.json; then echo 'High vulnerabilities found, failing build.'; rm -f audit-report.json; exit 1; fi; echo 'No critical/high vulnerabilities found.'; rm -f audit-report.json"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",

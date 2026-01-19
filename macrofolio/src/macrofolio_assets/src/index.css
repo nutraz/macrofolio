@@ -172,24 +172,26 @@
 }
 
 /* Table styles */
-.table-container {
-  @apply overflow-x-auto rounded-xl border border-border;
-}
+@layer utilities {
+  .table-container {
+    @apply overflow-x-auto rounded-xl border border-border;
+  }
 
-.table {
-  @apply min-w-full divide-y divide-border;
-}
+  .table {
+    @apply min-w-full divide-y divide-border;
+  }
 
-.table th {
-  @apply px-6 py-3 text-left text-xs font-medium text-textMuted uppercase tracking-wider bg-bg/50;
-}
+  .table th {
+    @apply px-6 py-3 text-left text-xs font-medium text-textMuted uppercase tracking-wider bg-bg/50;
+  }
 
-.table td {
-  @apply px-6 py-4 whitespace-nowrap text-sm text-textPrimary;
-}
+  .table td {
+    @apply px-6 py-4 whitespace-nowrap text-sm text-textPrimary;
+  }
 
-.table tbody tr {
-  @apply hover:bg-bg/30 transition-colors duration-150;
+  .table tbody tr {
+    @apply hover:bg-bg/30 transition-colors duration-150;
+  }
 }
 
 /* Status indicator */
@@ -207,11 +209,6 @@
 
 .status-dot-warning {
   @apply status-dot bg-warning;
-}
-
-/* Glassmorphism utility */
-.glass {
-  @apply backdrop-blur-xl bg-card/80 border border-border;
 }
 
 /* Page transition animations */

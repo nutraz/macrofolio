@@ -12,6 +12,11 @@ const ANCHOR_ABI = [
 // Example transaction hash for demo
 const EXAMPLE_TX_HASH = '0x...';
 
+interface OffChainRecord {
+  exists: boolean;
+  created_at?: string;
+}
+
 interface VerifyResult {
   success: boolean;
   user?: string;
@@ -19,10 +24,7 @@ interface VerifyResult {
   dataHash?: string;
   timestamp?: number;
   txHash?: string;
-  offChainRecord?: {
-    exists: boolean;
-    created_at?: string;
-  };
+  offChainRecord?: OffChainRecord;
   error?: string;
 }
 
@@ -78,7 +80,7 @@ const Verify: React.FC = () => {
       const event = parsedLog!.args;
 
       // Cross-verify with Supabase (optional but powerful)
-      let offChainRecord = { exists: false };
+      let offChainRecord: OffChainRecord = { exists: false };
       try {
         const { data: anchorData } = await supabase
           .from('anchors')
@@ -86,10 +88,10 @@ const Verify: React.FC = () => {
           .eq('data_hash', event.dataHash)
           .maybeSingle();
         
-        if (anchorData) {
+        if (anchorData && 'created_at' in anchorData) {
           offChainRecord = {
             exists: true,
-            created_at: anchorData.created_at
+            created_at: anchorData.created_at as string
           };
         }
       } catch (e) {

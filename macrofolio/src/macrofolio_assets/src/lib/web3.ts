@@ -48,6 +48,9 @@ class Web3Service {
     }
 
     try {
+      if (!window.ethereum) {
+        throw new Error('No Ethereum provider found. Please install MetaMask or another Web3 wallet.');
+      }
       this.provider = new ethers.BrowserProvider(window.ethereum);
       this.signer = await this.provider.getSigner();
       
@@ -103,7 +106,8 @@ class Web3Service {
    */
   async getBalance(): Promise<string> {
     if (!this.signer) throw new Error('Not connected');
-    const balance = await this.signer.provider.getBalance(this.signer.address);
+    const address = await this.signer.getAddress();
+    const balance = await this.signer.provider!.getBalance(address);
     return ethers.formatEther(balance);
   }
 

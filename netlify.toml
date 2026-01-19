@@ -1,5 +1,5 @@
 [build]
-  command = "cd macrofolio/src/macrofolio_assets && npm install && npm run build"
+  command = "cd macrofolio/src/macrofolio_assets && npm ci && npm run audit:check && npm run build"
   publish = "macrofolio/src/macrofolio_assets/dist"
   functions = "netlify/functions"
 
