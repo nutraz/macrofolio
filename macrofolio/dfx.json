@@ -1,0 +1,38 @@
+{
+  "canisters": {
+    "macrofolio_backend": {
+      "main": "src/macrofolio_backend/main.mo",
+      "type": "motoko"
+    },
+    "macrofolio_user": {
+      "declarations": {
+        "node_compatibility": true
+      },
+      "main": "src/macrofolio_user/main.mo",
+      "type": "motoko"
+    },
+    "macrofolio_assets": {
+      "dependencies": [
+        "macrofolio_backend"
+      ],
+      "source": [
+        "src/macrofolio_assets/dist"
+      ],
+      "type": "assets"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "networks": {
+    "local": {
+      "bind": "127.0.0.1:4943",
+      "type": "ephemeral"
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
