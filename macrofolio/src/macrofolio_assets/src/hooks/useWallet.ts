@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { web3Service, NETWORKS, ActionType } from '../lib/web3';
 import type { WalletState, NetworkConfig } from '../lib/types';
+import { useToast } from '../components/Toast';
 
 // Extend Window interface for MetaMask
 declare global {
@@ -26,10 +27,15 @@ interface WalletStateFull extends WalletState {
 // Session timeout (30 minutes of inactivity)
 const SESSION_TIMEOUT = 30 * 60 * 1000;
 
+// Connection timeout (10 seconds)
+const CONNECTION_TIMEOUT = 10000;
+
 /**
  * Wallet hook for managing Web3 connection state with security enhancements
  */
 export function useWallet() {
+  const toast = useToast();
+  
   const [state, setState] = useState<WalletStateFull>({
     isConnected: false,
     address: null,
@@ -133,12 +139,13 @@ export function useWallet() {
           if (accounts.length === 0) {
             // MetaMask locked or user disconnected
             console.warn('Account disconnected - clearing session');
+            toast.warning('Wallet Disconnected', 'Please reconnect to continue using Web3 features');
             disconnect();
           } else if (accounts[0] !== state.address) {
             // Account changed - disconnect for security
             console.warn('Account changed - disconnecting for security');
+            toast.warning('Account Changed', 'For your security, please reconnect your wallet');
             disconnect();
-            alert('Your wallet account changed. Please reconnect to continue.');
           }
         }
       };
@@ -159,7 +166,9 @@ export function useWallet() {
           
           // Disconnect if network changed unexpectedly
           if (!isCorrectNetwork) {
-            alert(`Network changed to ${network?.name || 'Unknown'}. Please switch to a supported network.`);
+            toast.warning('Network Changed', `Please switch to a supported network (Polygon Amoy or Base Sepolia). Current: ${network?.name || 'Unknown'}`);
+          } else {
+            toast.info('Network Changed', `Connected to ${network?.name || 'Unknown'}`);
           }
         }
       };
@@ -184,36 +193,59 @@ export function useWallet() {
   const connect = useCallback(async () => {
     setState(prev => ({ ...prev, loading: true, error: null }));
 
+    // Show loading toast
+    const loadingToastId = 'wallet-connect-loading';
+    toast.loading('Connecting Wallet...', 'Please approve the connection in MetaMask');
+
+    // Create timeout promise
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Connection timeout. Please try again.')), CONNECTION_TIMEOUT);
+    });
+
     try {
-      const address = await web3Service.connect();
-      const chainId = await web3Service.getChainId();
-      const network = Object.values(NETWORKS).find(n => n.chainId === chainId);
-      const balance = await web3Service.getBalance();
-      const isCorrectNetwork = Object.values(NETWORKS).some(n => n.chainId === chainId);
+      // Race between connection and timeout
+      const connectionPromise = (async () => {
+        const address = await web3Service.connect();
+        const chainId = await web3Service.getChainId();
+        const network = Object.values(NETWORKS).find(n => n.chainId === chainId);
+        const balance = await web3Service.getBalance();
+        const isCorrectNetwork = Object.values(NETWORKS).some(n => n.chainId === chainId);
 
-      // Update activity
-      lastActivityRef.current = Date.now();
+        // Update activity
+        lastActivityRef.current = Date.now();
 
-      setState({
-        isConnected: true,
-        address,
-        chainId,
-        networkName: network?.name || null,
-        balance,
-        loading: false,
-        error: null,
-        isCorrectNetwork,
-        remainingQuota: 0,
-        nextAnchorTime: null
-      });
+        setState({
+          isConnected: true,
+          address,
+          chainId,
+          networkName: network?.name || null,
+          balance,
+          loading: false,
+          error: null,
+          isCorrectNetwork,
+          remainingQuota: 0,
+          nextAnchorTime: null
+        });
 
-      // Update activity on user interaction
-      window.addEventListener('click', updateActivity);
-      window.addEventListener('keypress', updateActivity);
+        // Update activity on user interaction
+        window.addEventListener('click', updateActivity);
+        window.addEventListener('keypress', updateActivity);
 
-      return { success: true, address };
+        return { success: true, address };
+      })();
+
+      const result = await Promise.race([connectionPromise, timeoutPromise]);
+      
+      // Show success toast
+      toast.success('Wallet Connected', `Connected to ${state.networkName || 'wallet'}`);
+      
+      return result;
     } catch (error: any) {
       const errorMessage = error.message || 'Failed to connect wallet';
+      
+      // Show error toast
+      toast.error('Connection Failed', errorMessage);
+      
       setState(prev => ({
         ...prev,
         loading: false,
@@ -221,7 +253,7 @@ export function useWallet() {
       }));
       return { success: false, error: errorMessage };
     }
-  }, [updateActivity]);
+  }, [state.networkName, updateActivity, toast]);
 
   const disconnect = useCallback(async () => {
     await web3Service.disconnect();
