@@ -3,6 +3,7 @@ import PortfolioSummary from '../sections/PortfolioSummary';
 import PerformanceChart from '../sections/PerformanceChart';
 import Allocation from '../sections/Allocation';
 import AssetsTable from '../sections/AssetsTable';
+import DashboardLogo from '../components/DashboardLogo';
 import { Layers, Shield, Zap } from 'lucide-react';
 
 interface DashboardProps {
@@ -111,6 +112,19 @@ const Dashboard: React.FC<DashboardProps> = ({ assetTypes, loading, isDemoMode }
 
   return (
     <div className="max-w-[1400px] mx-auto px-6 py-8 space-y-8 animate-fade-in">
+      {/* Dashboard Header with Logo */}
+      <div className="bg-red-600 text-white py-6 relative -mx-6 px-6">
+        {/* Top center logo */}
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          <DashboardLogo size="lg" />
+        </div>
+        
+        <div className="container mx-auto pt-10 text-center">
+          <h1 className="text-3xl font-bold">Macrofolio Dashboard</h1>
+          <p className="text-red-200 text-sm mt-1">Track every investment. One portfolio. On-chain.</p>
+        </div>
+      </div>
+
       {/* Demo Mode Banner */}
       {isDemoMode && (
         <div className="bg-warning/10 border border-warning/30 rounded-xl p-4 flex items-center justify-between">
