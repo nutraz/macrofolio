@@ -21,7 +21,8 @@ const PUBLIC_ENV_VARS = {
   VITE_CONTRACT_ADDRESS: process.env.VITE_CONTRACT_ADDRESS,
   
   // Feature flags
-  VITE_DEMO_MODE: process.env.VITE_DEMO_MODE || 'true',
+  // SECURITY: Default to false (live mode) for demo mode to prevent accidental demo activation
+  VITE_DEMO_MODE: process.env.VITE_DEMO_MODE,
   VITE_ENABLE_ANALYTICS: process.env.VITE_ENABLE_ANALYTICS || 'false',
   
   // Network name for display

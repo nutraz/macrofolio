@@ -8,8 +8,10 @@ import Analytics from './pages/Analytics';
 import Alerts from './pages/Alerts';
 import Verify from './pages/Verify';
 import Premium from './pages/Premium';
+import { ToastProvider } from './components/Toast';
 import { useAuth } from './hooks/useAuth';
 import { useWallet } from './hooks/useWallet';
+import { useInternetIdentity } from './hooks/useInternetIdentity';
 import { Activity, Database, Zap, ExternalLink, ShieldAlert } from 'lucide-react';
 
 // Demo data
@@ -247,17 +249,72 @@ const ModeSwitcher: React.FC<ModeSwitcherProps> = ({ isDemoMode, onToggle }) => 
   );
 };
 
-function App() {
-  const { user, loading: authLoading, signIn } = useAuth();
-  const { 
-    isConnected: walletConnected, 
+// =============================================================================
+// Wallet Provider Component
+// Wraps wallet logic and handles toast context properly
+// =============================================================================
+
+interface WalletData {
+  isConnected: boolean;
+  address: string | null;
+  networkName: string | null;
+  connect: () => Promise<unknown>;
+  isMetaMaskInstalled: boolean;
+  loading: boolean;
+}
+
+const WalletProviderContent: React.FC<{
+  onWalletData: (walletData: WalletData) => React.ReactNode;
+}> = ({ onWalletData }) => {
+  // MetaMask/Web3 wallet hook - must be used inside ToastProvider
+  const {
+    isConnected: walletConnected,
     address: walletAddress,
     networkName,
     connect: connectWallet,
-    isMetaMaskInstalled 
+    isMetaMaskInstalled,
+    loading: walletLoading
   } = useWallet();
-  
-  const [isDemoMode, setIsDemoMode] = useState(true);
+
+  return onWalletData({
+    isConnected: walletConnected,
+    address: walletAddress,
+    networkName,
+    connect: connectWallet,
+    isMetaMaskInstalled,
+    loading: walletLoading
+  });
+};
+
+// =============================================================================
+// Main App Content Component
+// Receives wallet data and renders the full app UI
+// =============================================================================
+
+const AppContent: React.FC<{
+  walletData: WalletData;
+}> = ({ walletData }) => {
+  const { user, loading: authLoading, signIn } = useAuth();
+
+  // Internet Identity (ICP) hook - can be used here since it's inside ToastProvider
+  const {
+    isConnected: icpConnected,
+    principal: icpPrincipal,
+    network: icpNetwork,
+    loading: icpLoading,
+    connect: connectICP,
+    disconnect: disconnectICP
+  } = useInternetIdentity();
+
+  const { isConnected: walletConnected, address: walletAddress, networkName, connect: connectWallet, isMetaMaskInstalled, loading: walletLoading } = walletData;
+
+  // Demo mode detection from environment variable
+  // Defaults to false (live mode) if VITE_DEMO_MODE is not explicitly set to "true"
+  const [isDemoMode, setIsDemoMode] = useState(() => {
+    const demoMode = import.meta.env.VITE_DEMO_MODE;
+    // Only enable demo mode if explicitly set to "true"
+    return demoMode === 'true';
+  });
   const [currentView, setCurrentView] = useState<'dashboard' | 'portfolio' | 'analytics' | 'alerts' | 'verify' | 'premium'>('dashboard');
   const [demoLoading, setDemoLoading] = useState(true);
 
@@ -272,17 +329,46 @@ function App() {
     }
   }, [isDemoMode, user]);
 
-  // Determine connection state
-  const isConnected = isDemoMode || walletConnected || !!user;
-  const displayAddress = isDemoMode 
-    ? 'demo-user' 
-    : walletAddress 
-      ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` 
-      : null;
-  const displayNetwork = isDemoMode ? 'Demo Mode' : networkName || 'Unknown';
-  const dataSource = isDemoMode ? 'Demo Mode' : (walletConnected ? 'Supabase + Web3' : 'Supabase');
+  // Determine authentication method and connection state
+  const getAuthMethod = (): 'metamask' | 'icp' | 'supabase' | null => {
+    if (walletConnected) return 'metamask';
+    if (icpConnected) return 'icp';
+    if (user) return 'supabase';
+    return null;
+  };
 
-  const handleConnect = async () => {
+  const authMethod = getAuthMethod();
+  const isConnected = isDemoMode || walletConnected || icpConnected || !!user;
+
+  // Display address based on auth method
+  const displayAddress = isDemoMode
+    ? 'demo-user'
+    : authMethod === 'icp'
+      ? icpPrincipal
+        ? `${icpPrincipal.slice(0, 8)}...${icpPrincipal.slice(-8)}`
+        : 'ICP User'
+    : walletAddress
+      ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
+      : null;
+
+  // Network display
+  const displayNetwork = isDemoMode
+    ? 'Demo Mode'
+    : authMethod === 'icp'
+      ? icpNetwork || 'Internet Computer'
+      : networkName || 'Unknown';
+
+  // Data source label
+  const dataSource = isDemoMode
+    ? 'Demo Mode'
+    : authMethod === 'icp'
+      ? 'ICP + Supabase'
+    : walletConnected
+      ? 'Supabase + Web3'
+      : 'Supabase';
+
+  // Handle MetaMask connection
+  const handleConnectMetaMask = async () => {
     if (isDemoMode) {
       // Demo mode - no wallet needed
       return;
@@ -293,17 +379,32 @@ function App() {
     }
   };
 
+  // Handle ICP connection
+  const handleConnectICP = async () => {
+    if (isDemoMode) {
+      // Demo mode - no wallet needed
+      return;
+    }
+
+    if (!icpConnected) {
+      await connectICP();
+    }
+  };
+
   const toggleDemoMode = () => {
     setIsDemoMode(!isDemoMode);
   };
 
   const renderContent = () => {
     if (!isConnected) {
-      return <Splash 
-        onConnect={handleConnect} 
+      return <Splash
+        onConnectMetaMask={handleConnectMetaMask}
+        onConnectICP={handleConnectICP}
         isDemoMode={isDemoMode}
         onToggleDemoMode={toggleDemoMode}
         isMetaMaskInstalled={isMetaMaskInstalled}
+        isICPLoading={icpLoading}
+        walletLoading={walletLoading}
       />;
     }
 
@@ -324,9 +425,9 @@ function App() {
       case 'dashboard':
       default:
         return (
-          <Dashboard 
-            assetTypes={DEMO_ASSET_TYPES} 
-            loading={loading} 
+          <Dashboard
+            assetTypes={DEMO_ASSET_TYPES}
+            loading={loading}
             isDemoMode={isDemoMode}
           />
         );
@@ -336,8 +437,8 @@ function App() {
   return (
     <DemoModeGuard isDemoMode={isDemoMode}>
       <div className="min-h-screen bg-gradient-to-br from-bg via-bg to-bg text-textPrimary selection:bg-success/30">
-        <Header 
-          onNavigate={setCurrentView} 
+        <Header
+          onNavigate={setCurrentView}
           currentView={currentView}
           isConnected={isConnected}
           address={displayAddress}
@@ -345,8 +446,11 @@ function App() {
           isDemoMode={isDemoMode}
           onToggleDemoMode={toggleDemoMode}
           ModeSwitcher={() => <ModeSwitcher isDemoMode={isDemoMode} onToggle={toggleDemoMode} />}
+          authMethod={authMethod}
+          icpPrincipal={icpPrincipal}
+          onDisconnectICP={disconnectICP}
         />
-        
+
         <main className="container mx-auto px-4 py-8">
           {renderContent()}
         </main>
@@ -360,7 +464,7 @@ function App() {
             </div>
             <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-success animate-pulse' : 'bg-danger'}`}></div>
           </div>
-          
+
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
               <span className="text-textMuted">Connection</span>
@@ -368,7 +472,7 @@ function App() {
                 {isConnected ? displayNetwork : 'Offline'}
               </span>
             </div>
-            
+
             <div className="flex items-center justify-between text-xs">
               <span className="text-textMuted flex items-center gap-1">
                 <Database className="w-3 h-3" /> Data Source
@@ -377,7 +481,7 @@ function App() {
                 {dataSource}
               </span>
             </div>
-            
+
             <div className="flex items-center justify-between text-xs">
               <span className="text-textMuted flex items-center gap-1">
                 <Zap className="w-3 h-3" /> Latency
@@ -385,7 +489,7 @@ function App() {
               <span className="font-medium text-textPrimary">~120ms</span>
             </div>
           </div>
-          
+
           <div className="mt-3 pt-3 border-t border-border">
             <button className="flex items-center justify-center w-full text-xs text-textMuted hover:text-textPrimary transition-colors py-1">
               <ExternalLink className="w-3 h-3 mr-1" />
@@ -396,6 +500,23 @@ function App() {
       </div>
     </DemoModeGuard>
   );
+};
+
+// =============================================================================
+// Main App Component
+// =============================================================================
+
+function App() {
+  return (
+    <ToastProvider>
+      <WalletProviderContent
+        onWalletData={(walletData) => (
+          <AppContent walletData={walletData} />
+        )}
+      />
+    </ToastProvider>
+  );
 }
 
 export default App;
+
