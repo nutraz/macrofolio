@@ -1,59 +1,293 @@
-# macrofolio
+<div align="center">
+  <img src="src/macrofolio_assets/public/logo.png" alt="Macrofolio Logo" width="120" />
+</div>
 
-Welcome to your new macrofolio project and to the Internet Computer development community. By default, creating a new project adds this README and some template files to your project directory. You can edit these template files to customize your project and to include your own code to speed up the development cycle.
+# Macrofolio
 
-To get started, you might want to explore the project directory structure and the default configuration file. Working with this project in your development environment will not affect any production deployment or identity tokens.
+**Track every investment. One portfolio. On-chain.**
 
-To learn more before you start working with macrofolio, see the following documentation available online:
+Macrofolio is a self-custodial portfolio tracking DApp that enables users to track stocks, ETFs, crypto, gold, real estate, NFTs, and fixed income assets in a unified dashboard. Built with Web3 principles, it ensures users maintain complete control over their financial data with zero reliance on centralized banks.
 
-- [Quick Start](https://internetcomputer.org/docs/current/developer-docs/setup/deploy-locally)
-- [SDK Developer Tools](https://internetcomputer.org/docs/current/developer-docs/setup/install)
-- [Motoko Programming Language Guide](https://internetcomputer.org/docs/current/motoko/main/motoko)
-- [Motoko Language Quick Reference](https://internetcomputer.org/docs/current/motoko/main/language-manual)
+![Macrofolio Dashboard](https://via.placeholder.com/1200x600/1a1a2e/e94560?text=Macrofolio+Dashboard)
 
-If you want to start working on your project right away, you might want to try the following commands:
+## ✨ Features
+
+### Core Functionality
+- **Unified Portfolio Dashboard** - View all your assets across multiple classes in one place
+- **Multi-Asset Support** - Track Stocks/ETFs, Crypto, Gold & Silver, Real Estate, Fixed Income, and NFTs
+- **Real-Time Updates** - Live price tracking with sub-second latency
+- **Portfolio Analytics** - Performance charts, allocation breakdowns, and P&L calculations
+
+### Web3 Features
+- **Self-Custodial** - Your data stays secure. No centralized servers or custodial control
+- **MetaMask Integration** - Connect your Web3 wallet for full functionality
+- **Blockchain Anchoring** - Immutable portfolio proofs on Polygon Amoy and Base Sepolia
+- **Privacy-First** - Zero KYC requirements on testnet
+
+### Demo Mode
+- Explore the full dashboard experience without connecting a wallet
+- Local data storage for testing and onboarding
+- Seamless transition to Web3 mode when ready
+
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         Frontend Layer                           │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐             │
+│  │   React +   │  │  Tailwind   │  │  TypeScript │             │
+│  │   Vite      │  │    CSS      │  │             │             │
+│  └─────────────┘  └─────────────┘  └─────────────┘             │
+├─────────────────────────────────────────────────────────────────┤
+│                        Service Layer                             │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐             │
+│  │  Supabase   │  │  Ethers.js  │  │  React Hooks │            │
+│  │   Auth      │  │   (Web3)    │  │  (useWallet)│            │
+│  └─────────────┘  └─────────────┘  └─────────────┘             │
+├─────────────────────────────────────────────────────────────────┤
+│                        Data Layer                                │
+│  ┌───────────────────┐        ┌───────────────────┐            │
+│  │   Supabase DB     │        │  Blockchain       │            │
+│  │   (PostgreSQL)    │        │  (Polygon/Base)   │            │
+│  │                   │        │                   │            │
+│  │  • User Profiles  │        │  • Asset Anchors  │            │
+│  │  • Asset Records  │        │  • Proof of       │            │
+│  │  • Transactions   │        │    Holdings       │            │
+│  └───────────────────┘        └───────────────────┘            │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Frontend | React 18 + Vite |
+| Language | TypeScript |
+| Styling | Tailwind CSS |
+| Authentication | Supabase Auth |
+| Database | Supabase (PostgreSQL) |
+| Web3 | Ethers.js v6, MetaMask |
+| Subscriptions | RevenueCat SDK |
+| Blockchains | Polygon Amoy, Base Sepolia |
+| Smart Contracts | Solidity (PortfolioAnchor) |
+| Deployment | Netlify |
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js >= 16.0.0
+- npm >= 7.0.0
+- MetaMask browser extension (for Web3 features)
+- Supabase account (for backend services)
+
+### Installation
 
 ```bash
+# Navigate to project directory
 cd macrofolio/
-dfx help
-dfx canister --help
+
+# Install dependencies
+npm install
+
+# Install workspace dependencies
+npm install --workspaces
 ```
 
-## Running the project locally
+### Environment Setup
 
-If you want to test your project locally, you can use the following commands:
+Create a `.env` file in the `src/macrofolio_assets` directory:
 
-```bash
-# Starts the replica, running in the background
-dfx start --background
+```env
+# Supabase Configuration
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 
-# Deploys your canisters to the replica and generates your candid interface
-dfx deploy
+# Web3 Configuration
+VITE_CONTRACT_ADDRESS=your_portfolio_anchor_contract_address
+
+# Network (optional - defaults to Polygon Amoy)
+VITE_NETWORK_NAME=polygonAmoy
 ```
 
-Once the job completes, your application will be available at `http://localhost:4943?canisterId={asset_canister_id}`.
-
-If you have made changes to your backend canister, you can generate a new candid interface with
+### Development
 
 ```bash
-npm run generate
-```
-
-at any time. This is recommended before starting the frontend development server, and will be run automatically any time you run `dfx deploy`.
-
-If you are making frontend changes, you can start a development server with
-
-```bash
+# Start development server
 npm start
+
+# Build for production
+npm run build
+
+# Run tests
+npm test
 ```
 
-Which will start a server at `http://localhost:8080`, proxying API requests to the replica at port 4943.
+The development server will start at `http://localhost:8080` with API requests proxied to the local blockchain replica.
 
-### Note on frontend environment variables
+## 📱 Application Pages
 
-If you are hosting frontend code somewhere without using DFX, you may need to make one of the following adjustments to ensure your project does not fetch the root key in production:
+| Page | Route | Description |
+|------|-------|-------------|
+| Splash | `/` | Landing page with value proposition and mode selection |
+| Dashboard | `/dashboard` | Portfolio overview with summary, charts, and asset list |
+| Portfolio | `/portfolio` | Detailed asset management and transactions |
+| Analytics | `/analytics` | Advanced performance metrics and historical data |
+| Alerts | `/alerts` | Price movement and portfolio notifications |
+| Verify | `/verify` | On-chain verification of portfolio proofs |
+| Premium | `/premium` | RevenueCat subscription management page |
 
-- set`DFX_NETWORK` to `ic` if you are using Webpack
-- use your own preferred method to replace `process.env.DFX_NETWORK` in the autogenerated declarations
-  - Setting `canisters -> {asset_canister_id} -> declarations -> env_override to a string` in `dfx.json` will replace `process.env.DFX_NETWORK` with the string in the autogenerated declarations
-- Write your own `createActor` constructor
+## 🔐 Authentication
+
+### Demo Mode (No Wallet Required)
+- Email-based authentication via Supabase
+- Local data storage for demo purposes
+- Full dashboard access with simulated data
+
+### Web3 Mode
+- MetaMask wallet connection
+- Automatic network detection and switching
+- Blockchain-native identity management
+
+## ⛓️ Supported Networks
+
+| Network | Chain ID | Type |
+|---------|----------|------|
+| Polygon Amoy | 80002 | Testnet |
+| Base Sepolia | 84532 | Testnet |
+
+## 📦 Smart Contract
+
+The `PortfolioAnchor.sol` contract enables immutable portfolio anchoring:
+
+```solidity
+// Core functions
+function anchor(string actionType, bytes32 dataHash) returns (bytes32);
+function batchAnchor(string[] actionTypes, bytes32[] dataHashes);
+
+// Events
+event PortfolioAnchored(
+    address indexed user, 
+    string actionType, 
+    bytes32 dataHash, 
+    uint256 timestamp
+);
+```
+
+## 🎨 Design System
+
+### Theme
+- **Primary**: Blue (#3b82f6)
+- **Success**: Green (#22c55e)
+- **Warning**: Yellow (#eab308)
+- **Danger**: Red (#ef4444)
+- **Background**: Dark gradient (slate-900 to slate-800)
+
+### Components
+- Glassmorphism cards with backdrop blur
+- Interactive hover states with glow effects
+- Responsive grid layouts
+- Animated transitions and loading states
+
+## 📊 Asset Types
+
+Macrofolio supports tracking for:
+
+- 📈 **Stocks / ETFs** - Equity positions and index funds
+- 🪙 **Crypto Assets** - Digital currencies and tokens
+- 🥇 **Gold & Silver** - Precious metals
+- 🏠 **Real Estate** - Property holdings
+- 📋 **Fixed Income** - Bonds and debentures
+- 🖼️ **NFTs** - Digital collectibles
+
+## 🔒 Security Features
+
+- **Self-Custodial**: Users retain full control of their assets
+- **No KYC**: Privacy-first design with no identity requirements
+- **End-to-End Encryption**: Secure data transmission
+- **Wallet Connection**: Non-custodial wallet integration
+
+## 💰 RevenueCat Integration
+
+Macrofolio integrates **RevenueCat** for subscription management and in-app purchase tracking, enabling premium subscription features for the hackathon.
+
+### Hook: `useRevenueCat`
+The `useRevenueCat` hook handles offerings, purchase flow, and entitlement status:
+
+```typescript
+import { useRevenueCat } from '../hooks/useRevenueCat';
+
+const { isPremium, offerings, purchase, getOfferings } = useRevenueCat();
+```
+
+### Premium Page: `PremiumPage.tsx`
+The Premium subscription page demonstrates the complete RevenueCat flow:
+- Displays available subscription offerings (Monthly/Annual)
+- Handles purchase flow with loading states
+- Shows premium features unlocked after purchase
+- Toggle between premium user states
+
+### Entitlements
+| Entitlement ID | Feature |
+|---------------|---------|
+| `premium_access` | Full premium access |
+| `advanced_analytics` | Historical charts & metrics |
+| `export_features` | CSV/PDF export capabilities |
+
+### Products
+| Product ID | Description | Price |
+|------------|-------------|-------|
+| `macrofolio_monthly` | Monthly Pro subscription | $9.99/mo |
+| `macrofolio_yearly` | Annual Pro subscription | $99.99/yr |
+| `macrofolio_lifetime` | Lifetime premium pass | One-time |
+
+### Testing
+- Use RevenueCat sandbox/test accounts for safe integration
+- Demo mode simulates purchase flow without actual charges
+- Works across web platforms with RevenueCat JavaScript SDK
+
+### RevenueCat SDK
+```bash
+# Install via npm
+npm install @revenuecat/purchases-typescript-integration
+```
+
+## 📈 Roadmap
+
+### Phase 1 - MVP
+- [x] Unified portfolio dashboard
+- [x] Demo mode with local data
+- [x] MetaMask integration
+- [x] Multi-chain support
+
+### Phase 2 - Enhancement
+- [ ] Historical performance charts
+- [ ] Advanced analytics
+- [ ] CSV/PDF export
+- [ ] Custom alerts
+
+### Phase 3 - Expansion
+- [ ] AI-powered insights
+- [ ] Multi-portfolio support
+- [ ] DAO governance integration
+- [ ] Institutional features
+
+## 🤝 Contributing
+
+Contributions are welcome! Please read our contributing guidelines before submitting PRs.
+
+## 📄 License
+
+MIT License - See LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- [Supabase](https://supabase.com/) - Open source Firebase alternative
+- [Ethers.js](https://docs.ethers.org/) - Ethereum library
+- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
+- [Vite](https://vitejs.dev/) - Next-generation frontend tooling
+- [RevenueCat](https://www.revenuecat.com/) - Subscription management and in-app purchase platform
+
+---
+
+**Macrofolio** - Track every investment. One portfolio. On-chain.
