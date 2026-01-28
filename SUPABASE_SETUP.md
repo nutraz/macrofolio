@@ -63,7 +63,7 @@ CREATE TABLE anchors (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   action_type TEXT NOT NULL,
-  data_hash TEXT NOT NULL,
+  data_hash TEXT NOT NULL UNIQUE,
   chain_tx TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -74,15 +74,100 @@ ALTER TABLE assets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE anchors ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies (users can only access own data)
-CREATE POLICY "Users can view own data" ON users FOR SELECT USING (auth.uid() = id);
-CREATE POLICY "Users can insert own data" ON users FOR INSERT WITH CHECK (auth.uid() = id);
+-- =============================================================================
+-- SECURE RLS POLICIES (with null checks to prevent bypass)
+-- =============================================================================
 
-CREATE POLICY "Users can CRUD own assets" ON assets FOR ALL USING (auth.uid() = user_id);
+-- USERS TABLE - with explicit null checks
+CREATE POLICY "Users can view own data" ON users 
+FOR SELECT 
+USING (auth.uid() IS NOT NULL AND auth.uid() = id);
 
-CREATE POLICY "Users can CRUD own transactions" ON transactions FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own data" ON users 
+FOR INSERT 
+WITH CHECK (auth.uid() IS NOT NULL AND auth.uid() = id);
 
-CREATE POLICY "Users can CRUD own anchors" ON anchors FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Users can update own data" ON users 
+FOR UPDATE 
+USING (auth.uid() IS NOT NULL AND auth.uid() = id);
+
+-- ASSETS TABLE - with explicit null checks
+CREATE POLICY "Users can view own assets" ON assets 
+FOR SELECT 
+USING (auth.uid() IS NOT NULL AND auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own assets" ON assets 
+FOR INSERT 
+WITH CHECK (auth.uid() IS NOT NULL AND auth.uid() = user_id);
+
+CREATE POLICY "Users can update own assets" ON assets 
+FOR UPDATE 
+USING (auth.uid() IS NOT NULL AND auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own assets" ON assets 
+FOR DELETE 
+USING (auth.uid() IS NOT NULL AND auth.uid() = user_id);
+
+-- TRANSACTIONS TABLE - with explicit null checks
+CREATE POLICY "Users can view own transactions" ON transactions 
+FOR SELECT 
+USING (auth.uid() IS NOT NULL AND auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own transactions" ON transactions 
+FOR INSERT 
+WITH CHECK (auth.uid() IS NOT NULL AND auth.uid() = user_id);
+
+CREATE POLICY "Users can update own transactions" ON transactions 
+FOR UPDATE 
+USING (auth.uid() IS NOT NULL AND auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own transactions" ON transactions 
+FOR DELETE 
+USING (auth.uid() IS NOT NULL AND auth.uid() = user_id);
+
+-- ANCHORS TABLE - limited public read for verification, restricted write
+CREATE POLICY "Anyone can verify anchors by data_hash" ON anchors 
+FOR SELECT 
+USING (true);
+
+CREATE POLICY "Users can insert own anchors" ON anchors 
+FOR INSERT 
+WITH CHECK (auth.uid() IS NOT NULL AND auth.uid() = user_id);
+
+CREATE POLICY "Users can view own anchors" ON anchors 
+FOR SELECT 
+USING (auth.uid() IS NOT NULL AND auth.uid() = user_id);
+
+-- No UPDATE or DELETE for anchors (immutable proof)
+
+-- =============================================================================
+-- RATE LIMITING FUNCTION (prevent anchor enumeration)
+-- =============================================================================
+
+CREATE OR REPLACE FUNCTION check_verify_rate_limit()
+RETURNS TRIGGER AS $$
+DECLARE
+  recent_count INTEGER;
+  rate_limit CONSTANT INTEGER := 100; -- 100 requests per minute
+BEGIN
+  SELECT COUNT(*) INTO recent_count
+  FROM anchors
+  WHERE data_hash = NEW.data_hash
+    AND created_at > NOW() - INTERVAL '1 minute';
+  
+  IF recent_count > rate_limit THEN
+    RAISE EXCEPTION 'Rate limit exceeded for anchor verification';
+  END IF;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Create trigger for rate limiting (optional - enable if needed)
+-- DROP TRIGGER IF EXISTS rate_limit_verify ON anchors;
+-- CREATE TRIGGER rate_limit_verify
+--   BEFORE INSERT ON anchors
+--   FOR EACH ROW EXECUTE FUNCTION check_verify_rate_limit();
 ```
 
 ## 4. Configure Environment Variables

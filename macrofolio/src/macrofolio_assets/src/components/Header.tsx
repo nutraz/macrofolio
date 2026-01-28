@@ -1,14 +1,15 @@
 import React from 'react';
-import { Wallet, Settings, Bell, Search, Menu, X, Zap, Shield, CheckCircle } from 'lucide-react';
+import { Wallet, Settings, Bell, Search, Menu, X, Zap, Shield, CheckCircle, Crown } from 'lucide-react';
 
 interface HeaderProps {
   currentView: string;
-  onNavigate: (view: 'dashboard' | 'portfolio' | 'analytics' | 'alerts' | 'verify') => void;
+  onNavigate: (view: 'dashboard' | 'portfolio' | 'analytics' | 'alerts' | 'verify' | 'premium') => void;
   isConnected: boolean;
   address: string | null;
   network: string | null;
   isDemoMode: boolean;
   onToggleDemoMode: () => void;
+  ModeSwitcher?: () => React.ReactNode;
 }
 
 const Header: React.FC<HeaderProps> = ({ 
@@ -18,7 +19,8 @@ const Header: React.FC<HeaderProps> = ({
   address,
   network,
   isDemoMode,
-  onToggleDemoMode
+  onToggleDemoMode,
+  ModeSwitcher
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   
@@ -28,6 +30,7 @@ const Header: React.FC<HeaderProps> = ({
     { id: 'verify', label: 'Verify', icon: CheckCircle },
     { id: 'analytics', label: 'Analytics' },
     { id: 'alerts', label: 'Alerts' },
+    { id: 'premium', label: 'Premium', icon: Crown, highlight: true },
   ];
 
   return (
@@ -73,34 +76,44 @@ const Header: React.FC<HeaderProps> = ({
                   currentView === item.id
                     ? 'bg-border text-textPrimary shadow-lg'
                     : 'text-textMuted hover:text-textPrimary hover:bg-border/50 active:scale-[0.98]'
-                }`}
+                } ${item.highlight ? 'bg-gradient-to-r from-warning/20 to-orange-500/20 border border-warning/30 hover:from-warning/30 hover:to-orange-500/30' : ''}`}
                 aria-current={currentView === item.id ? 'page' : undefined}
               >
-                {item.icon && <item.icon className="w-4 h-4" />}
+                {item.icon && <item.icon className={`w-4 h-4 ${item.highlight ? 'text-warning' : ''}`} />}
                 {item.label}
+                {item.highlight && <span className="text-xs text-warning ml-1">★</span>}
               </button>
             ))}
           </nav>
 
           {/* Right: System Status Cluster & Actions */}
           <div className="flex items-center gap-2 sm:gap-4">
-            {/* Demo Mode Toggle */}
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-bg/50 rounded-lg border border-border/50">
-              <Zap className={`w-4 h-4 ${isDemoMode ? 'text-warning' : 'text-success'}`} />
-              <span className={`text-xs font-medium ${isDemoMode ? 'text-warning' : 'text-success'}`}>
-                {isDemoMode ? 'Demo' : 'Live'}
-              </span>
-              <button
-                onClick={onToggleDemoMode}
-                className={`w-8 h-4 rounded-full transition-colors relative ${
-                  isDemoMode ? 'bg-warning/30' : 'bg-success/30'
-                }`}
-              >
-                <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-transform ${
-                  isDemoMode ? 'left-0.5' : 'left-auto right-0.5'
-                }`} />
-              </button>
-            </div>
+            {/* Mode Switcher (from App.tsx) */}
+            {ModeSwitcher && (
+              <div className="hidden md:block">
+                <ModeSwitcher />
+              </div>
+            )}
+
+            {/* Demo Mode Toggle (fallback if ModeSwitcher not provided) */}
+            {!ModeSwitcher && (
+              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-bg/50 rounded-lg border border-border/50">
+                <Zap className={`w-4 h-4 ${isDemoMode ? 'text-warning' : 'text-success'}`} />
+                <span className={`text-xs font-medium ${isDemoMode ? 'text-warning' : 'text-success'}`}>
+                  {isDemoMode ? 'Demo' : 'Live'}
+                </span>
+                <button
+                  onClick={onToggleDemoMode}
+                  className={`w-8 h-4 rounded-full transition-colors relative ${
+                    isDemoMode ? 'bg-warning/30' : 'bg-success/30'
+                  }`}
+                >
+                  <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-transform ${
+                    isDemoMode ? 'left-0.5' : 'left-auto right-0.5'
+                  }`} />
+                </button>
+              </div>
+            )}
 
             {/* Search (decorative) */}
             <div className="hidden md:flex items-center bg-card/50 rounded-lg px-3 py-1.5 border border-border/50 transition-all duration-200 focus-within:border-success/30">
