@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="macrofolio/src/public/ChatGPT Image Jan 18, 2026, 05_03_10 PM.png" alt="Macrofolio" width="400">
+</div>
+
 # Macrofolio
 
 **Track every investment. One portfolio. On-chain.**
@@ -66,6 +70,7 @@ Macrofolio is a self-custodial portfolio tracking DApp that enables users to tra
 | Blockchains | Polygon Amoy, Base Sepolia |
 | Smart Contracts | Solidity (PortfolioAnchor) |
 | Deployment | Netlify |
+| Payments | RevenueCat (subscription management) |
 
 ## 🚀 Getting Started
 
@@ -129,6 +134,7 @@ The development server will start at `http://localhost:8080` with API requests p
 | Portfolio | `/portfolio` | Detailed asset management and transactions |
 | Analytics | `/analytics` | Advanced performance metrics and historical data |
 | Alerts | `/alerts` | Price movement and portfolio notifications |
+| Premium | `/premium` | Subscription management via RevenueCat |
 | Verify | `/verify` | On-chain verification of portfolio proofs |
 
 ## 🔐 Authentication
@@ -214,6 +220,7 @@ Macrofolio supports tracking for:
 - [ ] Advanced analytics
 - [ ] CSV/PDF export
 - [ ] Custom alerts
+- [ ] RevenueCat subscription integration
 
 ### Phase 3 - Expansion
 - [ ] AI-powered insights
@@ -235,7 +242,9 @@ MIT License - See LICENSE file for details.
 - [Ethers.js](https://docs.ethers.org/) - Ethereum library
 - [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
 - [Vite](https://vitejs.dev/) - Next-generation frontend tooling
+- [RevenueCat](https://www.revenuecat.com/) - Subscription management
 
 ---
 
 **Macrofolio** - Track every investment. One portfolio. On-chain.
+
