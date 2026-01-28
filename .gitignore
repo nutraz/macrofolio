@@ -5,3 +5,11 @@ dist/
 build/
 .cache/
 .DS_Store
+
+# Sensitive/auto-generated files
+macrofolio/client*
+macrofolio/*.key
+macrofolio/*.pem
+macrofolio/openvpnlog.*
+.env.local
+.env

@@ -75,7 +75,7 @@ export interface PortfolioSummary {
   assetsByType: Record<AssetType, number>;
 }
 
-// Web3 Types
+// Web3 Types (EVM/MetaMask)
 export interface WalletState {
   isConnected: boolean;
   address: string | null;
@@ -94,6 +94,31 @@ export interface NetworkConfig {
     symbol: string;
     decimals: number;
   };
+}
+
+// ICP Wallet State (Internet Identity)
+export interface ICPWalletState {
+  isConnected: boolean;
+  principal: string | null;
+  network: string | null;
+  loading: boolean;
+  error: string | null;
+}
+
+export interface ICPNetworkConfig {
+  name: string;
+  host: string;
+  explorerUrl: string;
+}
+
+// Unified Auth State combining all authentication methods
+export interface UnifiedAuthState {
+  isConnected: boolean;
+  authMethod: 'demo' | 'metamask' | 'icp' | 'supabase' | null;
+  userId: string | null;
+  displayAddress: string | null;
+  network: string | null;
+  dataSource: string;
 }
 
 // Anchor Result

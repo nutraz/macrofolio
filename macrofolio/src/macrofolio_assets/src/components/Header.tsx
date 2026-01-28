@@ -1,5 +1,5 @@
 import React from 'react';
-import { Wallet, Settings, Bell, Search, Menu, X, Zap, Shield, CheckCircle, Crown } from 'lucide-react';
+import { Wallet, Settings, Bell, Search, Menu, X, Zap, Shield, CheckCircle, Crown, Globe, Fingerprint } from 'lucide-react';
 
 interface HeaderProps {
   currentView: string;
@@ -10,6 +10,9 @@ interface HeaderProps {
   isDemoMode: boolean;
   onToggleDemoMode: () => void;
   ModeSwitcher?: () => React.ReactNode;
+  authMethod?: 'metamask' | 'icp' | 'supabase' | null;
+  icpPrincipal?: string | null;
+  onDisconnectICP?: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ 
@@ -20,7 +23,10 @@ const Header: React.FC<HeaderProps> = ({
   network,
   isDemoMode,
   onToggleDemoMode,
-  ModeSwitcher
+  ModeSwitcher,
+  authMethod,
+  icpPrincipal,
+  onDisconnectICP
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   
@@ -32,6 +38,38 @@ const Header: React.FC<HeaderProps> = ({
     { id: 'alerts', label: 'Alerts' },
     { id: 'premium', label: 'Premium', icon: Crown, highlight: true },
   ];
+
+  // Format ICP principal for display (truncate middle)
+  const formatPrincipal = (principal: string | null | undefined): string | null => {
+    if (!principal) return null;
+    return `${principal.slice(0, 8)}...${principal.slice(-8)}`;
+  };
+
+  // Get connection icon based on auth method
+  const getConnectionIcon = () => {
+    if (isDemoMode) return <Zap className="w-4 h-4 text-warning" />;
+    switch (authMethod) {
+      case 'icp':
+        return <Fingerprint className="w-4 h-4 text-purple-400" />;
+      case 'metamask':
+        return <Wallet className="w-4 h-4 text-success" />;
+      default:
+        return <Globe className="w-4 h-4 text-info" />;
+    }
+  };
+
+  // Get connection color based on auth method
+  const getConnectionColor = () => {
+    if (isDemoMode) return 'text-warning';
+    switch (authMethod) {
+      case 'icp':
+        return 'text-purple-400';
+      case 'metamask':
+        return 'text-success';
+      default:
+        return 'text-info';
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 backdrop-blur-xl bg-bg/80 border-b border-border">
@@ -152,26 +190,38 @@ const Header: React.FC<HeaderProps> = ({
               <div className="hidden sm:flex items-center gap-3">
                 <div className="text-right">
                   <p className="text-sm font-medium text-textPrimary">
-                    {isDemoMode ? 'Demo User' : address || 'User'}
+                    {isDemoMode 
+                      ? 'Demo User' 
+                      : authMethod === 'icp' 
+                        ? formatPrincipal(icpPrincipal) || 'ICP User'
+                        : address || 'User'
+                    }
                   </p>
-                  <p className={`text-xs ${isDemoMode ? 'text-warning' : 'text-success'}`}>
-                    {isDemoMode ? 'Demo Mode' : network || 'Connected'}
+                  <p className={`text-xs ${isDemoMode ? 'text-warning' : getConnectionColor()}`}>
+                    {isDemoMode 
+                      ? 'Demo Mode' 
+                      : authMethod === 'icp' 
+                        ? network || 'Internet Computer'
+                        : network || 'Connected'
+                    }
                   </p>
                 </div>
                 <div className={`flex items-center gap-2 px-3 py-1.5 ${
                   isDemoMode 
                     ? 'bg-warning/10 border border-warning/20' 
-                    : 'bg-success/10 border border-success/20'
+                    : authMethod === 'icp'
+                      ? 'bg-purple-500/10 border border-purple-500/20'
+                      : 'bg-success/10 border border-success/20'
                 } rounded-lg transition-all duration-200 ${
-                  isDemoMode ? 'hover:bg-warning/20' : 'hover:bg-success/20'
+                  isDemoMode ? 'hover:bg-warning/20' : authMethod === 'icp' ? 'hover:bg-purple-500/20' : 'hover:bg-success/20'
                 }`}>
                   <div className={`w-2 h-2 rounded-full animate-pulse ${
-                    isDemoMode ? 'bg-warning' : 'bg-success'
+                    isDemoMode ? 'bg-warning' : authMethod === 'icp' ? 'bg-purple-400' : 'bg-success'
                   }`} aria-hidden="true"></div>
                   <span className={`text-sm font-medium ${
-                    isDemoMode ? 'text-warning' : 'text-success'
+                    isDemoMode ? 'text-warning' : authMethod === 'icp' ? 'text-purple-400' : 'text-success'
                   }`}>
-                    {isDemoMode ? 'Demo' : 'Connected'}
+                    {isDemoMode ? 'Demo' : authMethod === 'icp' ? 'ICP' : 'Connected'}
                   </span>
                 </div>
               </div>
