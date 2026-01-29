@@ -1,0 +1,14 @@
+{
+  "agents": {
+    "coder": {
+      "model": "deepseek-coder:1.3b",
+      "instructions": "Follow instructions in GEMINI.md and CLAUDE.md",
+      "capabilities": ["code", "review", "test"]
+    },
+    "reviewer": {
+      "model": "llama3.2:3b-instruct-q4_0",
+      "instructions": "Follow AGENTS.MD for review guidelines",
+      "capabilities": ["review", "audit"]
+    }
+  }
+}

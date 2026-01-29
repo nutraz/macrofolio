@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="macrofolio/src/public/ChatGPT Image Jan 18, 2026, 05_03_10 PM.png" alt="Macrofolio" width="400">
+  <img src="macrofolio/src/macrofolio_assets/public/logo.png" alt="Macrofolio" width="400">
 </div>
 
 # Macrofolio
@@ -247,4 +247,50 @@ MIT License - See LICENSE file for details.
 ---
 
 **Macrofolio** - Track every investment. One portfolio. On-chain.
+
+## 💰 RevenueCat Integration
+
+Macrofolio integrates **RevenueCat** for subscription management and in-app purchase tracking, enabling premium subscription features for the hackathon.
+
+### Hook: `useRevenueCat`
+The `useRevenueCat` hook handles offerings, purchase flow, and entitlement status:
+
+```typescript
+import { useRevenueCat } from '../hooks/useRevenueCat';
+
+const { isPremium, offerings, purchase, getOfferings } = useRevenueCat();
+```
+
+### Premium Page: `PremiumPage.tsx`
+The Premium subscription page demonstrates the complete RevenueCat flow:
+- Displays available subscription offerings (Monthly/Annual)
+- Handles purchase flow with loading states
+- Shows premium features unlocked after purchase
+- Toggle between premium user states
+
+### Entitlements
+| Entitlement ID | Feature |
+|---------------|---------|
+| `premium_access` | Full premium access |
+| `advanced_analytics` | Historical charts & metrics |
+| `export_features` | CSV/PDF export capabilities |
+
+### Products
+| Product ID | Description | Price |
+|------------|-------------|-------|
+| `macrofolio_monthly` | Monthly Pro subscription | $9.99/mo |
+| `macrofolio_yearly` | Annual Pro subscription | $99.99/yr |
+| `macrofolio_lifetime` | Lifetime premium pass | One-time |
+
+### Testing
+- Use RevenueCat sandbox/test accounts for safe integration
+- Demo mode simulates purchase flow without actual charges
+- Works across web platforms with RevenueCat JavaScript SDK
+
+### RevenueCat SDK
+```bash
+# Install via npm
+npm install @revenuecat/purchases-typescript-integration
+```
+
 

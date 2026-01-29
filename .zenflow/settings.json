@@ -1,0 +1,31 @@
+{
+  "name": "Macrofolio",
+  "description": "Web3 Portfolio Dashboard",
+  "repository": ".",
+  "ai": {
+    "provider": "openai",
+    "apiKey": "ollama",
+    "baseURL": "http://localhost:11434/v1",
+    "model": "deepseek-coder:1.3b",
+    "temperature": 0.7
+  },
+  "rules": {
+    "include": [
+      "CLAUDE.md",
+      "AGENTS.MD",
+      "GEMINI.md",
+      ".github/copilot-instructions.md"
+    ],
+    "priorityOrder": ["CLAUDE.md", "AGENTS.MD"]
+  },
+  "workflow": {
+    "setupScript": "echo 'Setup complete'",
+    "testScript": "echo 'Running tests'",
+    "buildScript": "echo 'Building project'"
+  },
+  "agents": {
+    "maxConcurrent": 2,
+    "defaultModel": "deepseek-coder:1.3b",
+    "timeout": 180000
+  }
+}
