@@ -167,12 +167,6 @@ const PremiumPage: React.FC<PremiumPageProps> = () => {
           )}
         </div>
 
-        {/* Subscription Info */}
-        <div className="mt-8 text-center">
-          <p className="text-xs text-textMuted">
-            🔒 Secure subscription management • Demo mode enabled
-          </p>
-        </div>
       </div>
     </div>
   );

@@ -18,6 +18,8 @@ pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 
 /// @notice Action types for portfolio operations
 enum ActionType { ADD_ASSET, UPDATE_PORTFOLIO, DELETE_ASSET, REBALANCE }
@@ -38,8 +40,12 @@ struct AnchorInfo {
     uint8 schemaVersion;
 }
 
-contract PortfolioAnchor is ReentrancyGuard {
+contract PortfolioAnchor is ReentrancyGuard, Ownable, Pausable {
     using ECDSA for bytes32;
+
+    constructor(address initialOwner) Ownable(initialOwner) {
+        // Any other constructor logic can go here
+    }
 
     // ============ RATE LIMITING CONSTANTS ============
     uint256 private constant RATE_LIMIT_WINDOW = 1 hours;
@@ -111,7 +117,7 @@ contract PortfolioAnchor is ReentrancyGuard {
         bytes32 dataHash,
         uint256 deadline,
         bytes memory signature
-    ) external nonReentrant returns (bytes32) {
+    ) external nonReentrant whenNotPaused returns (bytes32) {
         require(block.timestamp <= deadline, "Signature expired");
         require(dataHash != bytes32(0), "Invalid data hash");
         
@@ -162,7 +168,7 @@ contract PortfolioAnchor is ReentrancyGuard {
         bytes32[] memory dataHashes,
         uint256 deadline,
         bytes memory signature
-    ) external nonReentrant {
+    ) external nonReentrant whenNotPaused {
         require(actionTypes.length == dataHashes.length, "Length mismatch");
         require(actionTypes.length > 0, "Empty arrays");
         require(actionTypes.length <= 50, "Max 50 per batch");
@@ -276,6 +282,20 @@ contract PortfolioAnchor is ReentrancyGuard {
     function getNextAnchorTime(address user) external view returns (uint256) {
         uint256 nextTime = lastAnchorTime[user] + MIN_ANCHOR_DELAY;
         return nextTime > block.timestamp ? nextTime : block.timestamp;
+    }
+
+    /**
+     * @notice Allows the owner to pause the contract
+     */
+    function pause() public onlyOwner {
+        _pause();
+    }
+
+    /**
+     * @notice Allows the owner to unpause the contract
+     */
+    function unpause() public onlyOwner {
+        _unpause();
     }
 
     /**

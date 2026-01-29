@@ -6,6 +6,7 @@
 - [x] Update .env.local.example for local testing
 - [x] Create LIVE_DAPP_TRANSITION_PLAN.md
 - [x] Create IMPLEMENTATION_GUIDE.md
+- [x] Updated .env.example with VITE_DEMO_MODE documentation and usage guide
 
 ## ⏳ Phase 2: Backend Setup - NEXT STEPS
 

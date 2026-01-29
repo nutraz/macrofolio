@@ -8,7 +8,7 @@
 
 Macrofolio is a self-custodial portfolio tracking DApp that enables users to track stocks, ETFs, crypto, gold, real estate, NFTs, and fixed income assets in a unified dashboard. Built with Web3 principles, it ensures users maintain complete control over their financial data with zero reliance on centralized banks.
 
-![Macrofolio Dashboard]([[https://via.placeholder.com/1200x600/1a1a2e/e94560?text=Macrofolio+Dashboard](https://6979bb3469101700083fef75--macrofolio.netlify.app/)](https://6979bb3469101700083fef75--macrofolio.netlify.app/))
+[![Macrofolio Dashboard](https://via.placeholder.com/1200x600/1a1a2e/e94560?text=Macrofolio+Dashboard)](https://6979bb3469101700083fef75--macrofolio.netlify.app/)
 
 ## ✨ Features
 
