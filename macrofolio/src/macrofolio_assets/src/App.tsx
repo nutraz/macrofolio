@@ -261,7 +261,7 @@ interface WalletData {
   connect: () => Promise<unknown>;
   isMetaMaskInstalled: boolean;
   loading: boolean;
-}
+};
 
 const WalletProviderContent: React.FC<{
   onWalletData: (walletData: WalletData) => React.ReactNode;
@@ -318,6 +318,19 @@ const AppContent: React.FC<{
   const [currentView, setCurrentView] = useState<'dashboard' | 'portfolio' | 'analytics' | 'alerts' | 'verify' | 'premium'>('dashboard');
   const [demoLoading, setDemoLoading] = useState(true);
 
+  // Check if this is a shareable/landing page link
+  const [isLandingPage, setIsLandingPage] = useState(false);
+  
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    // Check for shareable link parameters
+    const shareParams = ['ref', 'share', 'invite', 'referral', 'landing'];
+    const hasShareParam = shareParams.some(param => params.has(param));
+    if (hasShareParam) {
+      setIsLandingPage(true);
+    }
+  }, []);
+
   // Demo mode loading effect
   useEffect(() => {
     if (isDemoMode && !user) {
@@ -338,7 +351,8 @@ const AppContent: React.FC<{
   };
 
   const authMethod = getAuthMethod();
-  const isConnected = isDemoMode || walletConnected || icpConnected || !!user;
+  // Show landing page for shareable links, otherwise use normal connection logic
+  const isConnected = isLandingPage ? false : (isDemoMode || walletConnected || icpConnected || !!user);
 
   // Display address based on auth method
   const displayAddress = isDemoMode
