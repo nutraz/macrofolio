@@ -1,0 +1,12 @@
+{
+  "buildCommand": "cd macrofolio/src/macrofolio_assets && npm ci && npm run build",
+  "outputDirectory": "macrofolio/src/macrofolio_assets/dist",
+  "framework": "vite",
+  "builds": [
+    {
+      "src": "macrofolio/src/macrofolio_assets/package.json",
+      "use": "@vercel/static-build"
+    }
+  ]
+}
+
