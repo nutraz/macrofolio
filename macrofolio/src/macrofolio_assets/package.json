@@ -11,15 +11,18 @@
     "test:coverage": "jest --coverage",
     "test:security": "jest src/__tests__/security.test.ts src/__tests__/wallet.test.ts"
   },
-"dependencies": {
+  "dependencies": {
     "@dfinity/auth-client": "^3.4.3",
     "@dfinity/principal": "^3.4.3",
     "@supabase/supabase-js": "^2.93.3",
     "dompurify": "^3.0.5",
     "ethers": "^6.7.0",
+    "glob-parent": "^5.1.2",
+    "idb": "^7.1.1",
     "lucide-react": "^0.294.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "readdirp": "^3.6.0",
     "recharts": "^2.12.0",
     "zod": "^3.22.0"
   },

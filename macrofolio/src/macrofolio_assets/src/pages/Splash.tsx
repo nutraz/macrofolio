@@ -3,21 +3,17 @@ import { Shield, Layers, Zap, ArrowRight, ExternalLink, Lock, EyeOff, Database, 
 
 interface SplashProps {
   onConnectMetaMask: () => void;
-  onConnectICP: () => void;
   isDemoMode: boolean;
   onToggleDemoMode: () => void;
   isMetaMaskInstalled: boolean;
-  isICPLoading: boolean;
   walletLoading?: boolean;
 }
 
-const Splash: React.FC<SplashProps> = ({ 
+const Splash: React.FC<SplashProps> = ({
   onConnectMetaMask, 
-  onConnectICP,
   isDemoMode, 
   onToggleDemoMode, 
   isMetaMaskInstalled,
-  isICPLoading,
   walletLoading = false
 }) => {
   return (
@@ -95,20 +91,6 @@ const Splash: React.FC<SplashProps> = ({
                 Install MetaMask
               </a>
             )}
-
-            {/* Internet Identity */}
-            <button
-              onClick={onConnectICP}
-              disabled={isICPLoading || walletLoading}
-              className="btn-secondary px-8 py-4 text-lg flex items-center justify-center transition-all duration-300 hover:shadow-glow-purple border-purple-500/30 hover:border-purple-500/50 min-w-[220px]"
-            >
-              {isICPLoading ? (
-                <Loader2 className="w-5 h-5 mr-2 text-purple-400 animate-spin" />
-              ) : (
-                <Fingerprint className="w-5 h-5 mr-2 text-purple-400" />
-              )}
-              {isICPLoading ? 'Connecting...' : 'Internet Identity'}
-            </button>
           </div>
         )}
 
