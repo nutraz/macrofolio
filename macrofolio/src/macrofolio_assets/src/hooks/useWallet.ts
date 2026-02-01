@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { web3Service, NETWORKS, ActionType } from '../lib/web3';
-import type { WalletState, NetworkConfig } from '../lib/types';
+import { web3Service, NETWORKS } from '../lib/web3';
+import type { WalletState } from '../lib/types';
 import { useToast } from '../components/Toast';
 
 // Extend Window interface for MetaMask
@@ -194,7 +194,7 @@ export function useWallet() {
     setState(prev => ({ ...prev, loading: true, error: null }));
 
     // Show loading toast
-    const loadingToastId = 'wallet-connect-loading';
+    const _loadingToastId = 'wallet-connect-loading';
     toast.loading('Connecting Wallet...', 'Please approve the connection in MetaMask');
 
     // Create timeout promise

@@ -33,11 +33,6 @@ const AssetsTable: React.FC<{ isDemoMode?: boolean }> = ({ isDemoMode = true }) 
     }
   };
 
-  const getChangeColor = (change: number) => {
-    if (change >= 0) return 'text-success';
-    return 'text-danger';
-  };
-
   const totalValue = assets.reduce((sum, asset) => sum + asset.value, 0);
 
   return (

@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrendingUp, TrendingDown, Minus, ExternalLink } from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
 
 const PerformanceChart: React.FC = () => {
   // Mock data for sparkline

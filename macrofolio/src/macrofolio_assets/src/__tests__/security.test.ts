@@ -1,4 +1,3 @@
-const { describe, it, expect } = require('@jest/globals');
 const { z } = require('zod');
 
 describe('Security Validation - Core Logic', () => {

@@ -1,10 +1,9 @@
 import React from 'react';
-import { Wallet, Settings, Bell, Search, Menu, X, Zap, Shield, CheckCircle, Crown, Globe, Fingerprint } from 'lucide-react';
+import { Wallet, Settings, Bell, Search, Menu, X, Zap, CheckCircle, Crown, Globe, Fingerprint } from 'lucide-react';
 
 interface HeaderProps {
   currentView: string;
   onNavigate: (view: 'dashboard' | 'portfolio' | 'analytics' | 'alerts' | 'verify' | 'premium') => void;
-  isConnected: boolean;
   address: string | null;
   network: string | null;
   isDemoMode: boolean;
@@ -12,21 +11,20 @@ interface HeaderProps {
   ModeSwitcher?: () => React.ReactNode;
   authMethod?: 'metamask' | 'icp' | 'supabase' | null;
   icpPrincipal?: string | null;
-  onDisconnectICP?: () => void;
+  isConnected?: boolean;
+  onDisconnectICP?: () => Promise<void>;
 }
 
-const Header: React.FC<HeaderProps> = ({ 
-  currentView, 
-  onNavigate, 
-  isConnected,
+const Header: React.FC<HeaderProps> = ({
+  currentView,
+  onNavigate,
   address,
   network,
   isDemoMode,
   onToggleDemoMode,
   ModeSwitcher,
   authMethod,
-  icpPrincipal,
-  onDisconnectICP
+  icpPrincipal
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   
@@ -45,18 +43,7 @@ const Header: React.FC<HeaderProps> = ({
     return `${principal.slice(0, 8)}...${principal.slice(-8)}`;
   };
 
-  // Get connection icon based on auth method
-  const getConnectionIcon = () => {
-    if (isDemoMode) return <Zap className="w-4 h-4 text-warning" />;
-    switch (authMethod) {
-      case 'icp':
-        return <Fingerprint className="w-4 h-4 text-purple-400" />;
-      case 'metamask':
-        return <Wallet className="w-4 h-4 text-success" />;
-      default:
-        return <Globe className="w-4 h-4 text-info" />;
-    }
-  };
+
 
   // Get connection color based on auth method
   const getConnectionColor = () => {

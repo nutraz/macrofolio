@@ -38,7 +38,7 @@ export function useAssets(userId: string | null) {
       if (error) throw error;
 
       const assets = data || [];
-      const totalValue = assets.reduce((sum, asset) => {
+      const totalValue = assets.reduce((sum: number, asset: any) => {
         // Handle both computed and stored total_value
         const value = asset.total_value ?? (asset.quantity * asset.price_per_unit);
         return sum + value;
@@ -117,7 +117,7 @@ export function useAssets(userId: string | null) {
       if (error) throw error;
 
       const newAssets = state.assets.map(a => a.id === id ? data : a);
-      const totalValue = newAssets.reduce((sum, a) => {
+      const totalValue = newAssets.reduce((sum: number, a: any) => {
         const value = a.total_value ?? (a.quantity * a.price_per_unit);
         return sum + value;
       }, 0);

@@ -1,4 +1,4 @@
-const { describe, it, expect } = require('@jest/globals');
+import { describe, it, expect } from '@jest/globals';
 
 describe('Macrofolio Audit Readiness Verification', () => {
   it('should confirm test infrastructure is operational', () => {
@@ -85,17 +85,17 @@ describe('Macrofolio Audit Readiness Verification', () => {
                        fs.readFileSync(__dirname + '/wallet.test.ts', 'utf-8').toLowerCase();
     
     // Map area names to search terms
-    const searchTerms = {
+    const searchTerms: Record<string, string[]> = {
       'Input Validation': ['input validation', 'zod', 'schema'],
       'Wallet Security': ['wallet', 'metamask', 'ethereum'],
       'Chain Verification': ['chain', 'polygon', 'base', 'sepolia'],
       'Signature Validation': ['signature', 'eip-712', 'recovery'],
       'Smart Contract Security': ['contract', 'deploy', 'function']
     };
-    
-    criticalAreas.forEach(area => {
+
+    criticalAreas.forEach((area: string) => {
       const terms = searchTerms[area] || [area.toLowerCase()];
-      const found = terms.some(term => testContent.includes(term.toLowerCase()));
+      const found = terms.some((term: string) => testContent.includes(term.toLowerCase()));
       expect(found).toBe(true);
     });
   });

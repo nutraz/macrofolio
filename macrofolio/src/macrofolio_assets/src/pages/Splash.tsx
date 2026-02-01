@@ -1,5 +1,5 @@
 import React from 'react';
-import { Shield, Layers, Zap, ArrowRight, ExternalLink, Lock, EyeOff, Database, Wallet, AlertTriangle, Globe, Fingerprint, Loader2 } from 'lucide-react';
+import { Shield, Layers, Zap, ArrowRight, ExternalLink, Lock, EyeOff, Database, Wallet, AlertTriangle, Fingerprint, Loader2 } from 'lucide-react';
 
 interface SplashProps {
   onConnectMetaMask: () => void;

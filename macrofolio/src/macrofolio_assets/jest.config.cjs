@@ -1,5 +1,5 @@
 module.exports = {
-  testEnvironment: 'node', // Use node instead of jsdom to avoid window issues
+  testEnvironment: 'jsdom', // Use jsdom to provide Jest globals like describe, it, expect
   testMatch: [
     '<rootDir>/src/__tests__/**/*.test.ts',
     '<rootDir>/src/__tests__/**/*.test.tsx'

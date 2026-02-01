@@ -63,7 +63,7 @@ class Web3Service {
   private signer: ethers.Signer | null = null;
   private contract: ethers.Contract | null = null;
   private currentNetwork: NetworkConfig | null = null;
-  private cachedDomainSeparator: string | null = null;
+  private _cachedDomainSeparator: string | null = null;
 
   /**
    * Check if MetaMask is installed
