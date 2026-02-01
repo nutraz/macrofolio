@@ -11,7 +11,7 @@ import Premium from './pages/Premium';
 import { ToastProvider } from './components/Toast';
 import { useAuth } from './hooks/useAuth';
 import { useWallet } from './hooks/useWallet';
-import { useInternetIdentity } from './hooks/useInternetIdentity';
+
 import { Activity, Database, Zap, ExternalLink, ShieldAlert } from 'lucide-react';
 
 // Demo data
@@ -200,15 +200,7 @@ const AppContent: React.FC<{
 }> = ({ walletData }) => {
   const { user, loading: authLoading } = useAuth();
 
-  // Internet Identity (ICP) hook - can be used here since it's inside ToastProvider
-  const {
-    isConnected: icpConnected,
-    principal: icpPrincipal,
-    network: icpNetwork,
-    loading: icpLoading,
-    connect: connectICP,
-    disconnect: disconnectICP
-  } = useInternetIdentity();
+
 
   const { isConnected: walletConnected, address: walletAddress, networkName, connect: connectWallet, isMetaMaskInstalled, loading: walletLoading } = walletData;
 
@@ -247,24 +239,19 @@ const AppContent: React.FC<{
   }, [isDemoMode, user]);
 
   // Determine authentication method and connection state
-  const getAuthMethod = (): 'metamask' | 'icp' | 'supabase' | null => {
+  const getAuthMethod = (): 'metamask' | 'supabase' | null => {
     if (walletConnected) return 'metamask';
-    if (icpConnected) return 'icp';
     if (user) return 'supabase';
     return null;
   };
 
   const authMethod = getAuthMethod();
   // Show landing page for shareable links, otherwise use normal connection logic
-  const isConnected = isLandingPage ? false : (isDemoMode || walletConnected || icpConnected || !!user);
+  const isConnected = isLandingPage ? false : (isDemoMode || walletConnected || !!user);
 
   // Display address based on auth method
   const displayAddress = isDemoMode
     ? 'demo-user'
-    : authMethod === 'icp'
-      ? icpPrincipal
-        ? `${icpPrincipal.slice(0, 8)}...${icpPrincipal.slice(-8)}`
-        : 'ICP User'
     : walletAddress
       ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
       : null;
@@ -272,15 +259,11 @@ const AppContent: React.FC<{
   // Network display
   const displayNetwork = isDemoMode
     ? 'Demo Mode'
-    : authMethod === 'icp'
-      ? icpNetwork || 'Internet Computer'
-      : networkName || 'Unknown';
+    : networkName || 'Unknown';
 
   // Data source label
   const dataSource = isDemoMode
     ? 'Demo Mode'
-    : authMethod === 'icp'
-      ? 'ICP + Supabase'
     : walletConnected
       ? 'Supabase + Web3'
       : 'Supabase';
@@ -297,17 +280,7 @@ const AppContent: React.FC<{
     }
   };
 
-  // Handle ICP connection
-  const handleConnectICP = async () => {
-    if (isDemoMode) {
-      // Demo mode - no wallet needed
-      return;
-    }
 
-    if (!icpConnected) {
-      await connectICP();
-    }
-  };
 
   const toggleDemoMode = () => {
     setIsDemoMode(!isDemoMode);
@@ -317,11 +290,9 @@ const AppContent: React.FC<{
     if (!isConnected) {
       return <Splash
         onConnectMetaMask={handleConnectMetaMask}
-        onConnectICP={handleConnectICP}
         isDemoMode={isDemoMode}
         onToggleDemoMode={toggleDemoMode}
         isMetaMaskInstalled={isMetaMaskInstalled}
-        isICPLoading={icpLoading}
         walletLoading={walletLoading}
       />;
     }
@@ -364,9 +335,6 @@ const AppContent: React.FC<{
           isDemoMode={isDemoMode}
           onToggleDemoMode={toggleDemoMode}
           ModeSwitcher={() => <ModeSwitcher isDemoMode={isDemoMode} onToggle={toggleDemoMode} />}
-          authMethod={authMethod}
-          icpPrincipal={icpPrincipal}
-          onDisconnectICP={disconnectICP}
         />
 
         <main className="container mx-auto px-4 py-8">
