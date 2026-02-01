@@ -58,103 +58,7 @@ const DemoModeGuard: React.FC<DemoModeGuardProps> = ({ isDemoMode, children }) =
   );
 };
 
-// =============================================================================
-// SECURITY: Blockchain Transaction Button with Demo Check
-// =============================================================================
 
-interface TransactionButtonProps {
-  isDemoMode: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-  className?: string;
-  variant?: 'primary' | 'secondary';
-}
-
-const TransactionButton: React.FC<TransactionButtonProps> = ({ 
-  isDemoMode, 
-  onClick, 
-  children,
-  className = '',
-  variant = 'primary'
-}) => {
-  const [showConfirm, setShowConfirm] = useState(false);
-  
-  const handleClick = () => {
-    if (isDemoMode) {
-      setShowConfirm(true);
-      return;
-    }
-    onClick();
-  };
-  
-  const baseStyles = "flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed";
-  const variantStyles = variant === 'primary' 
-    ? "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary/90 hover:to-primary/70" 
-    : "bg-card border border-border text-textPrimary hover:bg-card/80";
-  
-  return (
-    <>
-      <button 
-        onClick={handleClick}
-        className={`${baseStyles} ${variantStyles} ${isDemoMode ? 'opacity-75' : ''} ${className}`}
-        disabled={isDemoMode}
-      >
-        {isDemoMode ? <Zap className="w-4 h-4" /> : null}
-        {isDemoMode ? "🔒 Demo Mode - Action Disabled" : children}
-      </button>
-      
-      {/* Demo mode info modal */}
-      {showConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-card border border-border rounded-xl p-6 max-w-md mx-4 shadow-xl">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-3 bg-warning/20 rounded-full">
-                <Zap className="w-6 h-6 text-warning" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-textPrimary">Demo Mode Active</h3>
-                <p className="text-sm text-textMuted">Blockchain interactions disabled</p>
-              </div>
-            </div>
-            
-            <p className="text-textSecondary mb-4">
-              This action is disabled in demo mode. Connect your wallet to anchor real portfolio data to the blockchain on Polygon Amoy or Base Sepolia testnets.
-            </p>
-            
-            <div className="bg-surface/50 rounded-lg p-3 mb-4">
-              <p className="text-sm text-textMuted">
-                <strong>Demo mode features:</strong>
-              </p>
-              <ul className="text-sm text-textSecondary mt-2 space-y-1">
-                <li>• Simulated data storage</li>
-                <li>• No real blockchain transactions</li>
-                <li>• UI/UX preview only</li>
-              </ul>
-            </div>
-            
-            <div className="flex gap-3">
-              <button 
-                onClick={() => setShowConfirm(false)}
-                className="flex-1 px-4 py-2 bg-card border border-border rounded-lg hover:bg-card/80 transition-colors"
-              >
-                Stay in Demo Mode
-              </button>
-              <button 
-                onClick={() => {
-                  setShowConfirm(false);
-                  window.location.reload();
-                }}
-                className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-              >
-                Switch to Live Mode
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
-  );
-};
 
 // =============================================================================
 // Mode Switching Confirmation Dialog
@@ -294,7 +198,7 @@ const WalletProviderContent: React.FC<{
 const AppContent: React.FC<{
   walletData: WalletData;
 }> = ({ walletData }) => {
-  const { user, loading: authLoading, signIn } = useAuth();
+  const { user, loading: authLoading } = useAuth();
 
   // Internet Identity (ICP) hook - can be used here since it's inside ToastProvider
   const {

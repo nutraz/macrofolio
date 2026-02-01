@@ -1,4 +1,3 @@
-const { describe, it, expect } = require('@jest/globals');
 
 describe('Wallet Security - Core Logic', () => {
   describe('Chain Verification', () => {

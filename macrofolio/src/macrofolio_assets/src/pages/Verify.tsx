@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, ExternalLink, CheckCircle, XCircle, Clock, Hash, User, Calendar, Shield, Info, Link as LinkIcon } from 'lucide-react';
+import { Search, ExternalLink, CheckCircle, XCircle, Hash, User, Calendar, Shield, Info, Link as LinkIcon } from 'lucide-react';
 import { ethers } from 'ethers';
 import { NETWORKS } from '../lib/web3';
 import { supabase } from '../lib/supabase';
@@ -118,7 +118,7 @@ const Verify: React.FC = () => {
     }
   };
 
-  const copyToClipboard = (text: string, label: string) => {
+  const copyToClipboard = (text: string, _label: string) => {
     navigator.clipboard.writeText(text);
     // Could add toast notification here
   };

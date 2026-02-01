@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useRevenueCat } from '../hooks/useRevenueCat';
 import { Check, Crown, Sparkles, Zap, Shield, BarChart3, Download } from 'lucide-react';
 
