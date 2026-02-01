@@ -31,7 +31,7 @@ const PUBLIC_ENV_VARS = {
 
 export default defineConfig({
   plugins: [react()],
-  root: '.',
+  root: path.resolve(__dirname),
   publicDir: 'public',
   build: {
     outDir: 'dist',
@@ -39,7 +39,7 @@ export default defineConfig({
     chunkSizeWarningLimit: 700,
     rollupOptions: {
       input: {
-        main: path.resolve(__dirname, 'index.html'),
+        main: 'index.html',
       },
       output: {
         manualChunks: {
