@@ -53,6 +53,7 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    allowedHosts: ['.netlify.app'],
   },
   define: {
     // Expose only explicitly allowed environment variables
