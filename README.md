@@ -19,14 +19,14 @@ Macrofolio provides a unified, blockchain-based portfolio tracker where users ca
 | Platform | Link | Status |
 |----------|------|--------|
 | 🌐 Web Demo | [macrofolio-app.vercel.app](https://macrofolio-app.vercel.app) | Live |
-| 📱 iOS TestFlight | [testflight.apple.com/join/XXX](https://testflight.apple.com/join/XXX) | Beta Testing |
+
 | 💼 Smart Contract | [amoy.polygonscan.com/address/0x7EF2...](https://amoy.polygonscan.com/address/0x7EF2e0048f5bAeDe046f6BF797943daF4ED8CB47) | Verified |
 | 🔗 Polygon Amoy | Contract: `0x7EF2e0048f5bAeDe046f6BF797943daF4ED8CB47` | Deployed |
 
 ## 👨‍⚖️ For Judges
 1. **🎥 Watch Demo Video** - [2-minute overview](https://youtu.be/5Fve86iO7BI)
-2. **📱 Try TestFlight App** - [Install iOS version](https://testflight.apple.com/join/XXX)
-3. **📝 Review Proposal** - [Full project documentation](proposal.pdf)
+
+3. **📝 Review Proposal** - [Full project documentation](https://drive.google.com/file/d/1EoO_7oegHr6JaR9cArDy03KXcJWlvvmC/view?usp=sharing)
 4. **💻 Test Smart Contract** - [Interactive Remix IDE](https://remix.ethereum.org/#lang=en&code=YOUR_CODE)
 
 ## 📱 QR Code for Easy Access
