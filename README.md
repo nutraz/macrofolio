@@ -1,5 +1,9 @@
 # 🚀 Macrofolio: Shipyard-Hackathon-Built Investment Intelligence Platform
 
+<div align="center">
+  <img src="https://raw.githubusercontent.com/nutraz/macrofolio/main/macrofolio/src/macrofolio_assets/public/logo.png" alt="Macrofolio Logo" width="150" height="150" />
+</div>
+
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-181818?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
