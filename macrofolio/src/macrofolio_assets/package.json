@@ -33,7 +33,7 @@
     "zod": "^3.22.0"
   },
   "devDependencies": {
-    "@nomicfoundation/hardhat-chai-matchers": "^3.0.0",
+
     "@nomicfoundation/hardhat-verify": "^2.1.3",
     "@openzeppelin/contracts": "^5.4.0",
     "@testing-library/jest-dom": "^6.1.0",
