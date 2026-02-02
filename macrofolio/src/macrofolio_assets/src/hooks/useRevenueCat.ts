@@ -1,4 +1,5 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useRevenueCatContext } from '../components/RevenueCatProvider';
 
 // RevenueCat entitlements configuration
 export const ENTITLEMENTS = {
@@ -9,9 +10,9 @@ export const ENTITLEMENTS = {
 
 // Product IDs
 export const PRODUCTS = {
-  MONTHLY_SUBSCRIPTION: 'macrofolio_monthly',
-  YEARLY_SUBSCRIPTION: 'macrofolio_yearly',
-  LIFETIME_PASS: 'macrofolio_lifetime',
+  MONTHLY_SUBSCRIPTION: 'macrofolio_monthly_subscription',
+  YEARLY_SUBSCRIPTION: 'macrofolio_yearly_subscription',
+  LIFETIME_PASS: 'macrofolio_lifetime_pass',
 } as const;
 
 // Subscription tier type
@@ -24,181 +25,117 @@ export interface Offering {
   description: string;
   priceString: string;
   productIdentifier: string;
+  periodType?: 'normal' | 'trial' | 'intro';
 }
 
-// Mock RevenueCat interface for demo
-interface MockRevenueCat {
-  getOfferings: () => Promise<{ 
-    current?: {
-      monthly?: Offering;
-      annual?: Offering;
-      lifetime?: Offering;
-    };
-  }>;
-  purchaseProduct: (productId: string) => Promise<{
-    customerInfo: {
-      entitlements: {
-        active: Record<string, { productIdentifier: string }>;
-      };
-    };
-  }>;
-  checkTrialStatus: () => Promise<boolean>;
-}
-
-class RevenueCatService {
-  private initialized: boolean = false;
-  private mockRC: MockRevenueCat = {
-    getOfferings: async () => {
-      return {
-        current: {
-          monthly: {
-            identifier: 'monthly',
-            title: 'Monthly Pro',
-            description: 'Full access to all premium features for one month',
-            priceString: '$9.99/mo',
-            productIdentifier: PRODUCTS.MONTHLY_SUBSCRIPTION,
-          },
-          annual: {
-            identifier: 'annual',
-            title: 'Annual Pro',
-            description: 'Full access to all premium features for one year - Save 17%',
-            priceString: '$99.99/yr',
-            productIdentifier: PRODUCTS.YEARLY_SUBSCRIPTION,
-          },
-        },
-      };
-    },
-    purchaseProduct: async (productId: string) => {
-      return {
-        customerInfo: {
-          entitlements: {
-            active: {
-              [ENTITLEMENTS.PREMIUM]: { productIdentifier: productId },
-            },
-          },
-        },
-      };
-    },
-    checkTrialStatus: async () => false,
-  };
-
-  async initialize(): Promise<void> {
-    if (this.initialized) return;
-    this.initialized = true;
-    console.log('RevenueCat service initialized (demo mode)');
-  }
-
-  async getOfferings(): Promise<{ 
-    current?: {
-      monthly?: Offering;
-      annual?: Offering;
-      lifetime?: Offering;
-    };
-  } | undefined> {
-    if (!this.initialized) await this.initialize();
-    try {
-      const offerings = await this.mockRC.getOfferings();
-      return offerings;
-    } catch (error) {
-      console.error('Failed to get offerings:', error);
-      return undefined;
-    }
-  }
-
-  async purchaseProduct(productId: string): Promise<{
-    success: boolean;
-    customerInfo?: {
-      entitlements: {
-        active: Record<string, { productIdentifier: string }>;
-      };
-    };
-    error?: Error;
-  }> {
-    if (!this.initialized) await this.initialize();
-    try {
-      const result = await this.mockRC.purchaseProduct(productId);
-      return { success: true, customerInfo: result.customerInfo };
-    } catch (error) {
-      return { success: false, error: error as Error };
-    }
-  }
-
-  async checkSubscriptionStatus(): Promise<{
-    isPro: boolean;
-    subscriptionTier: SubscriptionTier;
-    hasAdvancedAnalytics: boolean;
-  }> {
-    if (!this.initialized) await this.initialize();
-    return { isPro: false, subscriptionTier: 'free', hasAdvancedAnalytics: false };
-  }
-}
-
-const revenueCatService = new RevenueCatService();
-
+// Use the context-based hook
 export function useRevenueCat() {
-  const [isPremium, setIsPremium] = useState(false);
-  const [offerings, setOfferings] = useState<Offering[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const { 
+    customerInfo, 
+    offerings, 
+    isLoading, 
+    error, 
+    isPro, 
+    subscriptionTier,
+    purchaseMonthly,
+    purchaseYearly,
+    purchaseLifetime,
+    restorePurchases,
+    hasAdvancedAnalytics,
+    hasExportFeatures
+  } = useRevenueCatContext();
 
+  const [offeringList, setOfferingList] = useState<Offering[]>([]);
+
+  // Convert offerings to our format
   useEffect(() => {
-    const fetchOfferings = async () => {
-      setLoading(true);
-      try {
-        await revenueCatService.initialize();
-        const result = await revenueCatService.getOfferings();
-        if (result?.current) {
-          const available: Offering[] = [];
-          if (result.current.monthly) available.push(result.current.monthly);
-          if (result.current.annual) available.push(result.current.annual);
-          setOfferings(available);
-        }
-      } catch (e) {
-        setError(e as Error);
-      } finally {
-        setLoading(false);
+    if (offerings?.current) {
+      const available: Offering[] = [];
+      
+      if (offerings.current.monthly) {
+        const { product } = offerings.current.monthly;
+        available.push({
+          identifier: 'monthly',
+          title: product.title,
+          description: product.description,
+          priceString: product.priceString,
+          productIdentifier: product.identifier,
+          periodType: product.periodType,
+        });
       }
-    };
-    fetchOfferings();
-  }, []);
-
-  const purchase = useCallback(async (offeringId: string) => {
-    try {
-      const result = await revenueCatService.purchaseProduct(offeringId);
-      if (result.success && result.customerInfo?.entitlements.active[ENTITLEMENTS.PREMIUM]) {
-        setIsPremium(true);
-        return { success: true };
+      
+      if (offerings.current.annual) {
+        const { product } = offerings.current.annual;
+        available.push({
+          identifier: 'annual',
+          title: product.title,
+          description: product.description,
+          priceString: product.priceString,
+          productIdentifier: product.identifier,
+          periodType: product.periodType,
+        });
       }
-      return { success: false, error: new Error('Purchase not completed') };
-    } catch (e) {
-      return { success: false, error: e as Error };
+      
+      setOfferingList(available);
     }
-  }, []);
+  }, [offerings]);
+
+  const purchase = useCallback(async (productId: string) => {
+    if (productId === PRODUCTS.MONTHLY_SUBSCRIPTION) {
+      return purchaseMonthly();
+    } else if (productId === PRODUCTS.YEARLY_SUBSCRIPTION) {
+      return purchaseYearly();
+    } else if (productId === PRODUCTS.LIFETIME_PASS) {
+      return purchaseLifetime();
+    }
+    return { success: false, error: new Error('Unknown product') };
+  }, [purchaseMonthly, purchaseYearly, purchaseLifetime]);
 
   const getOfferings = useCallback(async () => {
-    setLoading(true);
-    try {
-      const result = await revenueCatService.getOfferings();
-      if (result?.current) {
-        const available: Offering[] = [];
-        if (result.current.monthly) available.push(result.current.monthly);
-        if (result.current.annual) available.push(result.current.annual);
-        setOfferings(available);
-      }
-    } catch (e) {
-      setError(e as Error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    return offeringList;
+  }, [offeringList]);
 
-  return { isPremium, offerings, loading, error, purchase, getOfferings, refreshSubscription: getOfferings };
+  return {
+    isPremium: isPro,
+    offerings: offeringList,
+    loading: isLoading,
+    error,
+    purchase,
+    getOfferings,
+    refreshSubscription: restorePurchases,
+    hasAdvancedAnalytics,
+    hasExportFeatures,
+    subscriptionTier,
+    customerInfo,
+  };
 }
 
 export function usePremiumStatus() {
-  const { isPremium, offerings, loading, purchase, getOfferings } = useRevenueCat();
-  return { isPremium, hasProAccess: isPremium, offerings, loading, purchase, refreshOfferings: getOfferings, isLoading: loading };
+  const { 
+    isPremium, 
+    offerings, 
+    loading, 
+    purchase, 
+    refreshSubscription, 
+    hasAdvancedAnalytics,
+    hasExportFeatures,
+    subscriptionTier
+  } = useRevenueCat();
+  
+  return { 
+    isPremium, 
+    hasProAccess: isPremium, 
+    offerings, 
+    loading, 
+    purchase, 
+    refreshOfferings: refreshSubscription, 
+    isLoading: loading,
+    hasAdvancedAnalytics,
+    hasExportFeatures,
+    subscriptionTier
+  };
 }
 
+// Backward compatibility - maintains existing API
 export default useRevenueCat;
 

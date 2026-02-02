@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PortfolioSummary from '../sections/PortfolioSummary';
 import PerformanceChart from '../sections/PerformanceChart';
 import Allocation from '../sections/Allocation';
 import AssetsTable from '../sections/AssetsTable';
 import DashboardLogo from '../components/DashboardLogo';
-import { Layers, Shield, Zap } from 'lucide-react';
+import { Layers, Shield, Zap, RefreshCw } from 'lucide-react';
+import { usePortfolio } from '../context/PortfolioContext';
 
 interface DashboardProps {
   assetTypes: string[];
@@ -12,8 +13,20 @@ interface DashboardProps {
   isDemoMode: boolean;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ assetTypes, loading, isDemoMode }) => {
-  if (loading) {
+const Dashboard: React.FC<DashboardProps> = ({ assetTypes, loading: authLoading, isDemoMode }) => {
+  const { assets, loading, summary, refreshPrices, isDemoMode: portfolioDemoMode } = usePortfolio();
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Combine loading states
+  const isLoading = authLoading || loading;
+
+  const handleRefreshPrices = async () => {
+    setRefreshing(true);
+    await refreshPrices();
+    setTimeout(() => setRefreshing(false), 500);
+  };
+
+  if (isLoading) {
     return (
       <div className="max-w-[1400px] mx-auto px-6 py-8 space-y-8 animate-fade-in">
         {/* Skeleton Portfolio Summary */}
@@ -21,16 +34,16 @@ const Dashboard: React.FC<DashboardProps> = ({ assetTypes, loading, isDemoMode }
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
             <div className="flex-1 space-y-4">
               <div className="flex items-center space-x-3">
-                <div className="skeleton-avatar w-10 h-10"></div>
-                <div className="skeleton-text w-32"></div>
+                <div className="w-10 h-10 rounded-full bg-border animate-pulse"></div>
+                <div className="w-32 h-4 bg-border rounded animate-pulse"></div>
               </div>
-              <div className="skeleton-title w-48"></div>
-              <div className="skeleton-text w-40"></div>
+              <div className="w-48 h-8 bg-border rounded animate-pulse"></div>
+              <div className="w-40 h-4 bg-border rounded animate-pulse"></div>
             </div>
             <div className="grid grid-cols-3 gap-3">
-              <div className="skeleton-card w-24 h-20"></div>
-              <div className="skeleton-card w-24 h-20"></div>
-              <div className="skeleton-card w-24 h-20"></div>
+              <div className="w-24 h-20 bg-border rounded-lg animate-pulse"></div>
+              <div className="w-24 h-20 bg-border rounded-lg animate-pulse"></div>
+              <div className="w-24 h-20 bg-border rounded-lg animate-pulse"></div>
             </div>
           </div>
         </div>
@@ -38,70 +51,44 @@ const Dashboard: React.FC<DashboardProps> = ({ assetTypes, loading, isDemoMode }
         {/* Skeleton Charts */}
         <div className="grid lg:grid-cols-2 gap-6">
           <div className="bg-gradient-to-br from-card to-card/50 border border-border rounded-2xl p-6 shadow-card-glow">
-            <div className="skeleton-title w-40 mb-6"></div>
-            <div className="skeleton-card h-48"></div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
-              <div className="skeleton-card h-16"></div>
-              <div className="skeleton-card h-16"></div>
-              <div className="skeleton-card h-16"></div>
-              <div className="skeleton-card h-16"></div>
-            </div>
+            <div className="w-40 h-6 bg-border rounded animate-pulse mb-6"></div>
+            <div className="h-48 bg-border rounded animate-pulse"></div>
           </div>
           <div className="bg-gradient-to-br from-card to-card/50 border border-border rounded-2xl p-6 shadow-card-glow">
-            <div className="skeleton-title w-40 mb-6"></div>
-            <div className="flex flex-col md:flex-row items-start md:items-center">
-              <div className="skeleton-avatar w-40 h-40 mx-auto mb-6 md:mb-0"></div>
-              <div className="flex-1 space-y-3 ml-0 md:ml-6">
-                <div className="skeleton-text w-full"></div>
-                <div className="skeleton-text w-full"></div>
-                <div className="skeleton-text w-full"></div>
-                <div className="skeleton-text w-3/4"></div>
-              </div>
-            </div>
+            <div className="w-40 h-6 bg-border rounded animate-pulse mb-6"></div>
+            <div className="h-48 bg-border rounded-full w-40 mx-auto animate-pulse"></div>
           </div>
-        </div>
-
-        {/* Skeleton Features */}
-        <div className="grid md:grid-cols-3 gap-4">
-          <div className="skeleton-card h-32"></div>
-          <div className="skeleton-card h-32"></div>
-          <div className="skeleton-card h-32"></div>
         </div>
 
         {/* Skeleton Asset Types */}
         <div className="bg-gradient-to-br from-card to-card/50 border border-border rounded-xl p-6">
-          <div className="skeleton-title w-40 mb-4"></div>
+          <div className="w-40 h-6 bg-border rounded animate-pulse mb-4"></div>
           <div className="flex flex-wrap gap-2">
-            <div className="skeleton-card w-24 h-8"></div>
-            <div className="skeleton-card w-24 h-8"></div>
-            <div className="skeleton-card w-24 h-8"></div>
-            <div className="skeleton-card w-24 h-8"></div>
-            <div className="skeleton-card w-24 h-8"></div>
-            <div className="skeleton-card w-24 h-8"></div>
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="w-24 h-8 bg-border rounded animate-pulse"></div>
+            ))}
           </div>
         </div>
 
         {/* Skeleton Table */}
         <div className="bg-gradient-to-br from-card to-card/50 border border-border rounded-2xl overflow-hidden shadow-card-glow">
           <div className="px-6 py-5 border-b border-border">
-            <div className="skeleton-title w-32 mb-2"></div>
-            <div className="skeleton-text w-48"></div>
+            <div className="w-32 h-6 bg-border rounded animate-pulse mb-2"></div>
+            <div className="w-48 h-4 bg-border rounded animate-pulse"></div>
           </div>
           <div className="p-6 space-y-4">
-            {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+            {[1, 2, 3, 4, 5].map((i) => (
               <div key={i} className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <div className="skeleton-avatar w-10 h-10"></div>
+                  <div className="w-10 h-10 bg-border rounded-full animate-pulse"></div>
                   <div className="space-y-2">
-                    <div className="skeleton-text w-32"></div>
-                    <div className="skeleton-text w-16"></div>
+                    <div className="w-32 h-4 bg-border rounded animate-pulse"></div>
+                    <div className="w-16 h-3 bg-border rounded animate-pulse"></div>
                   </div>
                 </div>
-                <div className="skeleton-text w-20"></div>
-                <div className="skeleton-text w-16"></div>
-                <div className="skeleton-text w-24"></div>
-                <div className="skeleton-text w-24"></div>
-                <div className="skeleton-text w-20"></div>
+                <div className="w-20 h-4 bg-border rounded animate-pulse"></div>
+                <div className="w-16 h-4 bg-border rounded animate-pulse"></div>
+                <div className="w-24 h-4 bg-border rounded animate-pulse"></div>
               </div>
             ))}
           </div>
@@ -113,7 +100,7 @@ const Dashboard: React.FC<DashboardProps> = ({ assetTypes, loading, isDemoMode }
   return (
     <div className="max-w-[1400px] mx-auto px-6 py-8 space-y-8 animate-fade-in">
       {/* Dashboard Header with Logo */}
-      <div className="bg-red-600 text-white py-6 relative -mx-6 px-6">
+      <div className="bg-gradient-to-br from-primary to-primary/80 text-white py-6 relative -mx-6 px-6 rounded-b-3xl">
         {/* Top center logo */}
         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
           <DashboardLogo size="lg" />
@@ -121,7 +108,14 @@ const Dashboard: React.FC<DashboardProps> = ({ assetTypes, loading, isDemoMode }
         
         <div className="container mx-auto pt-10 text-center">
           <h1 className="text-3xl font-bold">Macrofolio Dashboard</h1>
-          <p className="text-red-200 text-sm mt-1">Track every investment. One portfolio. On-chain.</p>
+          <p className="text-white/80 text-sm mt-1">Track every investment. One portfolio. On-chain.</p>
+          
+          {/* Asset Count */}
+          <div className="mt-4 inline-flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
+            <Layers className="w-4 h-4" />
+            <span className="text-sm">{assets.length} Assets Tracked</span>
+            {isDemoMode && <span className="text-xs bg-warning text-warning-foreground px-2 py-0.5 rounded">DEMO</span>}
+          </div>
         </div>
       </div>
 
@@ -132,22 +126,33 @@ const Dashboard: React.FC<DashboardProps> = ({ assetTypes, loading, isDemoMode }
             <Zap className="w-5 h-5 text-warning" />
             <div>
               <p className="text-warning font-medium">Demo Mode Active</p>
-              <p className="text-textMuted text-sm">Data is local. Connect wallet to enable blockchain anchoring.</p>
+              <p className="text-textMuted text-sm">Sample portfolio data loaded. Connect wallet for real blockchain anchoring.</p>
             </div>
           </div>
-          <button className="btn-secondary text-sm">
-            Connect Wallet
-          </button>
+          <div className="flex gap-2">
+            <button 
+              onClick={handleRefreshPrices}
+              disabled={refreshing}
+              className="btn-secondary text-sm flex items-center gap-2"
+            >
+              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+              Refresh Prices
+            </button>
+          </div>
         </div>
       )}
 
       {/* Portfolio Summary - Hero Section */}
-      <PortfolioSummary isDemoMode={isDemoMode} />
+      <PortfolioSummary 
+        isDemoMode={isDemoMode} 
+        summary={summary}
+        totalAssets={assets.length}
+      />
 
       {/* Charts Section */}
       <div className="grid lg:grid-cols-2 gap-6">
-        <PerformanceChart />
-        <Allocation />
+        <PerformanceChart assets={assets} />
+        <Allocation assets={assets} />
       </div>
 
       {/* Features Highlight */}
@@ -216,3 +221,4 @@ const Dashboard: React.FC<DashboardProps> = ({ assetTypes, loading, isDemoMode }
 };
 
 export default Dashboard;
+

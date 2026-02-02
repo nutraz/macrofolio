@@ -2,9 +2,13 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import './index.css'
 import App from './App'
+import { RevenueCatProvider } from './components/RevenueCatProvider'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
+    <RevenueCatProvider enableDemoMode={true}>
+      <App />
+    </RevenueCatProvider>
   </React.StrictMode>,
 )
+

@@ -12,6 +12,7 @@ import Premium from './pages/Premium';
 import { ToastProvider } from './components/Toast';
 import { useAuth } from './hooks/useAuth';
 import { useWallet } from './hooks/useWallet';
+import { PortfolioProvider } from './context/PortfolioContext';
 
 import { Activity, Database, Zap, ExternalLink, ShieldAlert } from 'lucide-react';
 
@@ -201,16 +202,14 @@ const AppContent: React.FC<{
 }> = ({ walletData }) => {
   const { user, loading: authLoading } = useAuth();
 
-
-
   const { isConnected: walletConnected, address: walletAddress, networkName, connect: connectWallet, isMetaMaskInstalled, loading: walletLoading } = walletData;
 
   // Demo mode detection from environment variable
-  // Defaults to false (live mode) if VITE_DEMO_MODE is not explicitly set to "true"
+  // Defaults to true for demo mode if not explicitly set
   const [isDemoMode, setIsDemoMode] = useState(() => {
     const demoMode = import.meta.env.VITE_DEMO_MODE;
-    // Only enable demo mode if explicitly set to "true"
-    return demoMode === 'true';
+    // Only disable demo mode if explicitly set to "false"
+    return demoMode !== 'false';
   });
   const [currentView, setCurrentView] = useState<'dashboard' | 'portfolio' | 'analytics' | 'alerts' | 'verify' | 'premium'>('dashboard');
   const [demoLoading, setDemoLoading] = useState(true);
@@ -281,8 +280,6 @@ const AppContent: React.FC<{
     }
   };
 
-
-
   const toggleDemoMode = () => {
     setIsDemoMode(!isDemoMode);
   };
@@ -330,7 +327,6 @@ const AppContent: React.FC<{
         <Header
           onNavigate={setCurrentView}
           currentView={currentView}
-          isConnected={isConnected}
           address={displayAddress}
           network={displayNetwork}
           isDemoMode={isDemoMode}
@@ -399,7 +395,9 @@ function App() {
       <ToastProvider>
         <WalletProviderContent
           onWalletData={(walletData) => (
-            <AppContent walletData={walletData} />
+            <PortfolioProvider isDemoMode={true}>
+              <AppContent walletData={walletData} />
+            </PortfolioProvider>
           )}
         />
       </ToastProvider>

@@ -1,12 +1,24 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRevenueCat } from '../hooks/useRevenueCat';
-import { Check, Crown, Sparkles, Zap, Shield, BarChart3, Download } from 'lucide-react';
+import { Check, Crown, Sparkles, Zap, Shield, BarChart3, Download, AlertCircle } from 'lucide-react';
+import { PRODUCTS } from '../hooks/useRevenueCat';
 
 interface PremiumPageProps {}
 
 const PremiumPage: React.FC<PremiumPageProps> = () => {
-  const { isPremium, offerings, loading, purchase, getOfferings } = useRevenueCat();
-  const [purchasing, setPurchasing] = React.useState<string | null>(null);
+  const { 
+    isPremium, 
+    offerings, 
+    loading, 
+    error,
+    purchase, 
+    getOfferings,
+    subscriptionTier,
+    customerInfo
+  } = useRevenueCat();
+  
+  const [purchasing, setPurchasing] = useState<string | null>(null);
+  const [purchaseError, setPurchaseError] = useState<string | null>(null);
 
   useEffect(() => {
     getOfferings();
@@ -14,15 +26,17 @@ const PremiumPage: React.FC<PremiumPageProps> = () => {
 
   const handlePurchase = async (productId: string) => {
     setPurchasing(productId);
+    setPurchaseError(null);
+    
     try {
       const result = await purchase(productId);
       if (result.success) {
         alert('Purchase successful! Welcome to Premium!');
       } else {
-        alert('Purchase not completed. Please try again.');
+        setPurchaseError(result.error?.message || 'Purchase not completed. Please try again.');
       }
-    } catch (error) {
-      alert('Purchase failed. Please try again.');
+    } catch (err) {
+      setPurchaseError('Purchase failed. Please try again.');
     } finally {
       setPurchasing(null);
     }
@@ -46,6 +60,24 @@ const PremiumPage: React.FC<PremiumPageProps> = () => {
     );
   }
 
+  // Get the offerings from our state
+  const availableOfferings = offerings && offerings.length > 0 ? offerings : [
+    {
+      identifier: 'monthly',
+      title: 'Monthly Pro',
+      description: 'Full access to all premium features for one month',
+      priceString: '$9.99/mo',
+      productIdentifier: PRODUCTS.MONTHLY_SUBSCRIPTION,
+    },
+    {
+      identifier: 'annual',
+      title: 'Annual Pro',
+      description: 'Full access to all premium features for one year - Save 17%',
+      priceString: '$99.99/yr',
+      productIdentifier: PRODUCTS.YEARLY_SUBSCRIPTION,
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-bg via-bg to-bg text-textPrimary py-12">
       <div className="max-w-4xl mx-auto px-4">
@@ -59,18 +91,48 @@ const PremiumPage: React.FC<PremiumPageProps> = () => {
           </h1>
           <p className="text-lg text-textMuted max-w-2xl mx-auto">
             Get unlimited access to advanced analytics, real-time alerts, and premium features. 
-            Secure subscription management with demo mode enabled.
+            {subscriptionTier === 'free' 
+              ? ' Subscribe today to unlock all premium features.' 
+              : ' Thank you for being a premium subscriber!'}
           </p>
+          
+          {/* RevenueCat Debug Info */}
+          {customerInfo && (
+            <div className="mt-4 p-3 bg-card/50 border border-border rounded-lg text-xs text-textMuted">
+              <p>Customer ID: {customerInfo.originalAppUserID}</p>
+              <p>Entitlements: {Object.keys(customerInfo.entitlements?.active || {}).join(', ') || 'None'}</p>
+            </div>
+          )}
         </div>
 
         {/* Premium Status Banner */}
         {isPremium ? (
           <div className="bg-gradient-to-r from-success/20 to-green-500/10 border border-success/30 rounded-2xl p-8 mb-12 text-center">
             <Sparkles className="w-12 h-12 text-success mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-success mb-2">🎉 You are a Premium User!</h2>
-            <p className="text-textMuted">Enjoy full access to all premium features.</p>
+            <h2 className="text-2xl font-bold text-success mb-2">
+              {subscriptionTier === 'lifetime' ? '🎉 Lifetime Access Active!' : '🎉 You are a Premium User!'}
+            </h2>
+            <p className="text-textMuted">
+              {subscriptionTier === 'lifetime' 
+                ? 'You have lifetime access to all premium features.' 
+                : 'Enjoy full access to all premium features.'}
+            </p>
           </div>
         ) : null}
+
+        {/* Error Display */}
+        {purchaseError && (
+          <div className="bg-danger/10 border border-danger/30 rounded-xl p-4 mb-6 flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-danger flex-shrink-0" />
+            <p className="text-danger text-sm">{purchaseError}</p>
+            <button 
+              onClick={() => setPurchaseError(null)}
+              className="ml-auto text-textMuted hover:text-textPrimary"
+            >
+              ✕
+            </button>
+          </div>
+        )}
 
         {/* Features Grid */}
         <div className="grid md:grid-cols-2 gap-6 mb-12">
@@ -91,48 +153,66 @@ const PremiumPage: React.FC<PremiumPageProps> = () => {
 
         {/* Subscription Plans */}
         <div className="bg-gradient-to-br from-card to-card/50 border border-border rounded-2xl p-8">
-          <h2 className="text-2xl font-bold text-center mb-8">Choose Your Plan</h2>
+          <h2 className="text-2xl font-bold text-center mb-8">
+            {isPremium ? 'Your Current Plan' : 'Choose Your Plan'}
+          </h2>
           
-          {offerings.length > 0 ? (
-            <div className="grid md:grid-cols-2 gap-6">
-              {offerings.map((offering) => (
-                <div 
-                  key={offering.identifier}
-                  className={`relative bg-gradient-to-br from-bg to-bg border rounded-xl p-6 transition-all duration-300 ${
-                    offering.identifier === 'annual' 
-                      ? 'border-success/50 shadow-glow-green' 
-                      : 'border-border hover:border-primary/50'
-                  }`}
-                >
-                  {offering.identifier === 'annual' && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-success text-white text-xs font-medium px-3 py-1 rounded-full">
-                      Best Value - Save 17%
-                    </div>
-                  )}
-                  
-                  <div className="text-center mb-6">
-                    <h3 className="text-xl font-bold text-textPrimary mb-2">{offering.title}</h3>
-                    <p className="text-textMuted text-sm mb-4">{offering.description}</p>
-                    <div className="text-3xl font-bold text-textPrimary">
-                      {offering.priceString}
-                    </div>
+          <div className="grid md:grid-cols-2 gap-6">
+            {availableOfferings.map((offering) => (
+              <div 
+                key={offering.identifier}
+                className={`relative bg-gradient-to-br from-bg to-bg border rounded-xl p-6 transition-all duration-300 ${
+                  offering.identifier === 'annual' 
+                    ? 'border-success/50 shadow-glow-green' 
+                    : 'border-border hover:border-primary/50'
+                } ${isPremium && subscriptionTier !== 'free' ? 'opacity-75' : ''}`}
+              >
+                {offering.identifier === 'annual' && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-success text-white text-xs font-medium px-3 py-1 rounded-full">
+                    Best Value - Save 17%
                   </div>
+                )}
+                
+                {/* Active Plan Badge */}
+                {isPremium && 
+                  ((subscriptionTier === 'pro' && offering.identifier === 'annual') ||
+                   (subscriptionTier === 'free' && offering.identifier === 'monthly')) && (
+                  <div className="absolute -top-3 right-4 bg-primary text-white text-xs font-medium px-3 py-1 rounded-full">
+                    Current Plan
+                  </div>
+                )}
+                
+                <div className="text-center mb-6">
+                  <h3 className="text-xl font-bold text-textPrimary mb-2">{offering.title}</h3>
+                  <p className="text-textMuted text-sm mb-4">{offering.description}</p>
+                  <div className="text-3xl font-bold text-textPrimary">
+                    {offering.priceString}
+                  </div>
+                </div>
 
-                  <ul className="space-y-3 mb-6">
-                    <li className="flex items-center text-sm text-textMuted">
-                      <Check className="w-4 h-4 text-success mr-2" />
-                      All premium features unlocked
-                    </li>
-                    <li className="flex items-center text-sm text-textMuted">
-                      <Check className="w-4 h-4 text-success mr-2" />
-                      Cancel anytime
-                    </li>
-                    <li className="flex items-center text-sm text-textMuted">
-                      <Check className="w-4 h-4 text-success mr-2" />
-                      Secure payment via RevenueCat
-                    </li>
-                  </ul>
+                <ul className="space-y-3 mb-6">
+                  <li className="flex items-center text-sm text-textMuted">
+                    <Check className="w-4 h-4 text-success mr-2" />
+                    All premium features unlocked
+                  </li>
+                  <li className="flex items-center text-sm text-textMuted">
+                    <Check className="w-4 h-4 text-success mr-2" />
+                    Cancel anytime
+                  </li>
+                  <li className="flex items-center text-sm text-textMuted">
+                    <Check className="w-4 h-4 text-success mr-2" />
+                    Secure payment via RevenueCat
+                  </li>
+                </ul>
 
+                {isPremium ? (
+                  <button
+                    disabled={true}
+                    className="w-full py-3 px-4 rounded-lg font-medium bg-card border border-border text-textMuted cursor-not-allowed"
+                  >
+                    Current Plan
+                  </button>
+                ) : (
                   <button
                     onClick={() => handlePurchase(offering.productIdentifier)}
                     disabled={purchasing === offering.productIdentifier}
@@ -151,20 +231,35 @@ const PremiumPage: React.FC<PremiumPageProps> = () => {
                       `Subscribe ${offering.priceString}`
                     )}
                   </button>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <p className="text-textMuted">No offerings available at the moment.</p>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Restore Purchases Link */}
+          {!isPremium && (
+            <div className="text-center mt-6">
               <button 
-                onClick={getOfferings}
-                className="mt-4 btn-secondary"
+                onClick={() => {
+                  // In a real app, this would call restorePurchases
+                  alert('In demo mode, this would restore your previous purchases. In production, RevenueCat will automatically restore purchases on app launch.');
+                }}
+                className="text-sm text-textMuted hover:text-textPrimary underline"
               >
-                Refresh Offerings
+                Restore Purchases
               </button>
             </div>
           )}
+        </div>
+
+        {/* RevenueCat Integration Info */}
+        <div className="mt-8 p-4 bg-info/10 border border-info/20 rounded-xl">
+          <h3 className="text-sm font-semibold text-info mb-2">🔒 Secure Subscription Management</h3>
+          <p className="text-xs text-textMuted">
+            Payments are securely processed through RevenueCat with support for Apple App Store, 
+            Google Play Store, and web subscriptions. Your subscription is linked to your account 
+            and will restore automatically on all your devices.
+          </p>
         </div>
 
       </div>
