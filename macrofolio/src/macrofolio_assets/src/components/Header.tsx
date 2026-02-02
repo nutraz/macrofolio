@@ -8,6 +8,7 @@ interface HeaderProps {
   network: string | null;
   isDemoMode: boolean;
   onToggleDemoMode: () => void;
+  onNavigate?: (view: 'dashboard' | 'portfolio' | 'analytics' | 'alerts' | 'verify' | 'premium') => void;
   ModeSwitcher?: () => React.ReactNode;
 }
 

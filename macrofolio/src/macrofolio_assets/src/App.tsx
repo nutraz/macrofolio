@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter } from 'react-router-dom';
 import './App.css';
 import Header from './components/Header';
 import Splash from './pages/Splash';
@@ -394,13 +395,15 @@ const AppContent: React.FC<{
 
 function App() {
   return (
-    <ToastProvider>
-      <WalletProviderContent
-        onWalletData={(walletData) => (
-          <AppContent walletData={walletData} />
-        )}
-      />
-    </ToastProvider>
+    <BrowserRouter>
+      <ToastProvider>
+        <WalletProviderContent
+          onWalletData={(walletData) => (
+            <AppContent walletData={walletData} />
+          )}
+        />
+      </ToastProvider>
+    </BrowserRouter>
   );
 }
 
