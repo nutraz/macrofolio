@@ -18,7 +18,7 @@
     "verify:amoy": "hardhat verify --network amoy",
     "chain": "hardhat node --hostname 0.0.0.0"
   },
-  "dependencies": {
+"dependencies": {
     "@dfinity/auth-client": "^3.4.3",
     "@dfinity/principal": "^3.4.3",
     "@supabase/supabase-js": "^2.93.3",
