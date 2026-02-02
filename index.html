@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Macrofolio - Shipyard Submission</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+               background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 40px; }
+        .header h1 { font-size: 3rem; margin-bottom: 10px; }
+        .header p { font-size: 1.2rem; opacity: 0.9; }
+        .links { display: grid; gap: 20px; }
+        .link-card { background: rgba(255,255,255,0.1); padding: 25px; border-radius: 15px;
+                     backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
+        .link-card:hover { background: rgba(255,255,255,0.2); transform: translateY(-5px);
+                          transition: all 0.3s ease; }
+        .link-card a { color: white; text-decoration: none; font-size: 1.1rem;
+                      display: flex; align-items: center; gap: 10px; }
+        .emoji { font-size: 1.5rem; }
+        .footer { margin-top: 40px; text-align: center; opacity: 0.7; }
+        .contract-address { background: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px;
+                           font-family: monospace; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Macrofolio</h1>
+            <p>Blockchain Investment Portfolio Tracker for VisualFaktory's Shipyard Brief</p>
+            <p><em>Shipyard Creator Contest Submission</em></p>
+        </div>
+
+        <div class="links">
+            <div class="link-card">
+                <a href="https://youtu.be/XXX">
+                    <span class="emoji">🎥</span>
+                    <div>
+                        <strong>Demo Video (2 minutes)</strong>
+                        <div>See the app in action</div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="link-card">
+                <a href="https://testflight.apple.com/join/XXX">
+                    <span class="emoji">📱</span>
+                    <div>
+                        <strong>iOS TestFlight App</strong>
+                        <div>Try the mobile app</div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="link-card">
+                <a href="https://macrofolio-app.vercel.app">
+                    <span class="emoji">🌐</span>
+                    <div>
+                        <strong>Web Demo</strong>
+                        <div>Browser-based interface</div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="link-card">
+                <a href="https://amoy.polygonscan.com/address/0x7EF2e0048f5bAeDe046f6BF797943daF4ED8CB47">
+                    <span class="emoji">💼</span>
+                    <div>
+                        <strong>Smart Contract</strong>
+                        <div>Verified on Polygon Amoy</div>
+                        <div class="contract-address">0x7EF2e0048f5bAeDe046f6BF797943daF4ED8CB47</div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="link-card">
+                <a href="https://github.com/nutraz/macrofolio">
+                    <span class="emoji">🔧</span>
+                    <div>
+                        <strong>GitHub Repository</strong>
+                        <div>Full source code</div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="link-card">
+                <a href="proposal.pdf">
+                    <span class="emoji">📝</span>
+                    <div>
+                        <strong>Project Proposal</strong>
+                        <div>Detailed documentation</div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="link-card">
+                <a href="https://remix.ethereum.org/#lang=en&code=YOUR_CODE">
+                    <span class="emoji">💻</span>
+                    <div>
+                        <strong>Interactive Contract</strong>
+                        <div>Test on Remix IDE</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Built for Shipyard: Creator Contest | VisualFaktory Brief</p>
+            <p>Monetized with RevenueCat | Deployed on Polygon</p>
+            <p>© 2024 Macrofolio | MIT License</p>
+        </div>
+    </div>
+</body>
+</html>
