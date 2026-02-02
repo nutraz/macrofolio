@@ -24,7 +24,7 @@ Macrofolio provides a unified, blockchain-based portfolio tracker where users ca
 | 🔗 Polygon Amoy | Contract: `0x7EF2e0048f5bAeDe046f6BF797943daF4ED8CB47` | Deployed |
 
 ## 👨‍⚖️ For Judges
-1. **🎥 Watch Demo Video** - [2-minute overview](https://youtu.be/XXX)
+1. **🎥 Watch Demo Video** - [2-minute overview](https://youtu.be/5Fve86iO7BI)
 2. **📱 Try TestFlight App** - [Install iOS version](https://testflight.apple.com/join/XXX)
 3. **📝 Review Proposal** - [Full project documentation](proposal.pdf)
 4. **💻 Test Smart Contract** - [Interactive Remix IDE](https://remix.ethereum.org/#lang=en&code=YOUR_CODE)

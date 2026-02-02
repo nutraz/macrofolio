@@ -1,9 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Wallet, Settings, Bell, Search, Menu, X, Zap, CheckCircle, Crown, Globe, Fingerprint } from 'lucide-react';
 
 interface HeaderProps {
   currentView: string;
-  onNavigate: (view: 'dashboard' | 'portfolio' | 'analytics' | 'alerts' | 'verify' | 'premium') => void;
   address: string | null;
   network: string | null;
   isDemoMode: boolean;
@@ -13,7 +13,6 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({
   currentView,
-  onNavigate,
   address,
   network,
   isDemoMode,
@@ -21,6 +20,7 @@ const Header: React.FC<HeaderProps> = ({
   ModeSwitcher,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const navigate = useNavigate();
   
   const navigationItems = [
     { id: 'dashboard', label: 'Dashboard' },
@@ -69,7 +69,7 @@ const Header: React.FC<HeaderProps> = ({
             {navigationItems.map((item) => (
               <button
                 key={item.id}
-                onClick={() => onNavigate(item.id as any)}
+                onClick={() => navigate('/' + item.id)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-success/50 flex items-center gap-2 ${
                   currentView === item.id
                     ? 'bg-border text-textPrimary shadow-lg'
@@ -205,7 +205,7 @@ const Header: React.FC<HeaderProps> = ({
                 <button
                   key={item.id}
                   onClick={() => {
-                    onNavigate(item.id as any);
+                    navigate('/' + item.id);
                     setMobileMenuOpen(false);
                   }}
                   className={`px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 text-left ${

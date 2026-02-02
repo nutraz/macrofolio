@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import './App.css';
 import Header from './components/Header';
 import Splash from './pages/Splash';
@@ -6,12 +7,15 @@ import Dashboard from './pages/Dashboard';
 import Portfolio from './pages/Portfolio';
 import Analytics from './pages/Analytics';
 import Alerts from './pages/Alerts';
+import DemoPage from './pages/DemoPage'; // Import the new DemoPage
 
 function App() {
   const [isConnected, setIsConnected] = useState(false);
   const [assetTypes, setAssetTypes] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentView, setCurrentView] = useState<'dashboard' | 'portfolio' | 'analytics' | 'alerts'>('dashboard');
+
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const mockAssetTypes = [
@@ -33,23 +37,8 @@ function App() {
     setIsConnected(true);
   };
 
-  const renderContent = () => {
-    if (!isConnected) {
-      return <Splash onConnect={handleConnect} />;
-    }
-
-    switch (currentView) {
-      case 'portfolio':
-        return <Portfolio />;
-      case 'analytics':
-        return <Analytics />;
-      case 'alerts':
-        return <Alerts />;
-      case 'dashboard':
-      default:
-        return <Dashboard assetTypes={assetTypes} loading={loading} />;
-    }
-  };
+  // Determine currentView based on location for Header
+  const currentView = location.pathname.substring(1) || 'dashboard'; // Remove leading '/'
 
   // Inline styles as fallback
   const containerStyle = {
@@ -60,10 +49,16 @@ function App() {
 
   return (
     <div style={containerStyle}>
-      <Header onNavigate={setCurrentView} currentView={currentView} />
+      <Header onNavigate={(view) => navigate('/' + view)} currentView={currentView} />
       
       <main className="container mx-auto px-4 py-8">
-        {renderContent()}
+        <Routes>
+          <Route path="/" element={isConnected ? <Dashboard assetTypes={assetTypes} loading={loading} /> : <Splash onConnect={handleConnect} />} />
+          <Route path="/portfolio" element={<Portfolio />} />
+          <Route path="/analytics" element={<Analytics />} />
+          <Route path="/alerts" element={<Alerts />} />
+          <Route path="/demo" element={<DemoPage isConnected={isConnected} handleConnect={handleConnect} assetTypes={assetTypes} loading={loading} />} />
+        </Routes>
       </main>
 
       {/* System Status Footer */}

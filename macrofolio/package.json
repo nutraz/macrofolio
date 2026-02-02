@@ -12,7 +12,10 @@
     "install:all": "npm install && cd src/macrofolio_assets && npm install"
   },
   "devDependencies": {
-    "hardhat": "^2.22.0",
-    "@nomicfoundation/hardhat-toolbox": "^5.0.0"
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.0"
+  },
+  "dependencies": {
+    "react-router-dom": "^7.13.0"
   }
 }
