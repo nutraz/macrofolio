@@ -18,7 +18,7 @@ Macrofolio provides a unified, blockchain-based portfolio tracker where users ca
 ## 🚀 Live Demos
 | Platform | Link | Status |
 |----------|------|--------|
-| 🌐 Web Demo | [macrofolio-app.vercel.app](https://macrofolio-app.vercel.app) | Live |
+| 🌐 Web Demo | [macrofolio-app.vercel.app]([https://macrofolio-app.vercel.app](https://macrofolio.vercel.app/)) | Live |
 
 | 💼 Smart Contract | [amoy.polygonscan.com/address/0x7EF2...](https://amoy.polygonscan.com/address/0x7EF2e0048f5bAeDe046f6BF797943daF4ED8CB47) | Verified |
 | 🔗 Polygon Amoy | Contract: `0x7EF2e0048f5bAeDe046f6BF797943daF4ED8CB47` | Deployed |
