@@ -18,11 +18,11 @@
     "verify:amoy": "hardhat verify --network amoy",
     "chain": "hardhat node --hostname 0.0.0.0"
   },
-"dependencies": {
+  "dependencies": {
     "@capacitor/core": "^6.0.0",
     "@dfinity/auth-client": "^3.4.3",
-    "@revenuecat/purchases-react-web": "^5.0.0",
     "@dfinity/principal": "^3.4.3",
+    "@revenuecat/purchases-js": "^1.24.4",
     "@supabase/supabase-js": "^2.93.3",
     "dompurify": "^3.0.5",
     "glob-parent": "^5.1.2",
@@ -36,7 +36,7 @@
     "zod": "^3.22.0"
   },
   "devDependencies": {
-    "@nomicfoundation/hardhat-verify": "^2.1.3",
+    "@nomicfoundation/hardhat-verify": "^3.0.9",
     "@openzeppelin/contracts": "^5.4.0",
     "@testing-library/jest-dom": "^6.1.0",
     "@testing-library/react": "^14.0.0",
