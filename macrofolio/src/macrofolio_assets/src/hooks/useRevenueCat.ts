@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useRevenueCatContext } from '../components/RevenueCatProvider';
 
 // RevenueCat entitlements configuration
@@ -12,7 +12,7 @@ export const ENTITLEMENTS = {
 export const PRODUCTS = {
   MONTHLY_SUBSCRIPTION: 'macrofolio_monthly_subscription',
   YEARLY_SUBSCRIPTION: 'macrofolio_yearly_subscription',
-  LIFETIME_PASS: 'macrofolio_lifetime_pass',
+  LIFETIME_PASS: 'macrofolio_lifetime_subscription',
 } as const;
 
 // Subscription tier type
@@ -28,85 +28,65 @@ export interface Offering {
   periodType?: 'normal' | 'trial' | 'intro';
 }
 
-// Use the context-based hook
+// Main hook that wraps the context with additional functionality
 export function useRevenueCat() {
   const { 
     customerInfo, 
-    offerings, 
     isLoading, 
-    error, 
-    isPro, 
-    subscriptionTier,
-    purchaseMonthly,
-    purchaseYearly,
-    purchaseLifetime,
+    isPremium, 
+    products,
+    refreshCustomerInfo,
+    purchaseProduct,
     restorePurchases,
-    hasAdvancedAnalytics,
-    hasExportFeatures
+    isConfigured,
+    isDemoMode
   } = useRevenueCatContext();
 
-  const [offeringList, setOfferingList] = useState<Offering[]>([]);
+  // Convert products to offerings format
+  const offerings: Offering[] = products.map((product: any) => ({
+    identifier: product.identifier,
+    title: product.title,
+    description: product.description,
+    priceString: product.priceString,
+    productIdentifier: product.identifier,
+    periodType: product.periodType,
+  }));
 
-  // Convert offerings to our format
-  useEffect(() => {
-    if (offerings?.current) {
-      const available: Offering[] = [];
-      
-      if (offerings.current.monthly) {
-        const { product } = offerings.current.monthly;
-        available.push({
-          identifier: 'monthly',
-          title: product.title,
-          description: product.description,
-          priceString: product.priceString,
-          productIdentifier: product.identifier,
-          periodType: product.periodType,
-        });
-      }
-      
-      if (offerings.current.annual) {
-        const { product } = offerings.current.annual;
-        available.push({
-          identifier: 'annual',
-          title: product.title,
-          description: product.description,
-          priceString: product.priceString,
-          productIdentifier: product.identifier,
-          periodType: product.periodType,
-        });
-      }
-      
-      setOfferingList(available);
-    }
-  }, [offerings]);
-
-  const purchase = useCallback(async (productId: string) => {
-    if (productId === PRODUCTS.MONTHLY_SUBSCRIPTION) {
-      return purchaseMonthly();
-    } else if (productId === PRODUCTS.YEARLY_SUBSCRIPTION) {
-      return purchaseYearly();
-    } else if (productId === PRODUCTS.LIFETIME_PASS) {
-      return purchaseLifetime();
-    }
-    return { success: false, error: new Error('Unknown product') };
-  }, [purchaseMonthly, purchaseYearly, purchaseLifetime]);
+  const purchase = useCallback(async (productId: string): Promise<{ success: boolean; error?: Error }> => {
+    const result = await purchaseProduct(productId);
+    return { success: result };
+  }, [purchaseProduct]);
 
   const getOfferings = useCallback(async () => {
-    return offeringList;
-  }, [offeringList]);
+    return offerings;
+  }, [offerings]);
+
+  const getSubscriptionTier = (): SubscriptionTier => {
+    if (!customerInfo?.subscriber?.entitlements?.active?.premium) {
+      return 'free';
+    }
+    const productId = customerInfo.subscriber.entitlements.active.premium.product_identifier;
+    if (productId === PRODUCTS.LIFETIME_PASS) {
+      return 'lifetime';
+    }
+    return 'pro';
+  };
 
   return {
-    isPremium: isPro,
-    offerings: offeringList,
+    isPremium,
+    offerings,
     loading: isLoading,
-    error,
+    error: null,
     purchase,
     getOfferings,
-    refreshSubscription: restorePurchases,
-    hasAdvancedAnalytics,
-    hasExportFeatures,
-    subscriptionTier,
+    refreshSubscription: refreshCustomerInfo,
+    hasAdvancedAnalytics: isPremium,
+    hasExportFeatures: isPremium,
+    subscriptionTier: getSubscriptionTier(),
     customerInfo,
+    isConfigured,
+    isDemoMode,
+    restorePurchases,
   };
 }
 
@@ -119,7 +99,10 @@ export function usePremiumStatus() {
     refreshSubscription, 
     hasAdvancedAnalytics,
     hasExportFeatures,
-    subscriptionTier
+    subscriptionTier,
+    customerInfo,
+    isDemoMode,
+    restorePurchases
   } = useRevenueCat();
   
   return { 
@@ -132,7 +115,10 @@ export function usePremiumStatus() {
     isLoading: loading,
     hasAdvancedAnalytics,
     hasExportFeatures,
-    subscriptionTier
+    subscriptionTier,
+    customerInfo,
+    isDemoMode,
+    restorePurchases
   };
 }
 

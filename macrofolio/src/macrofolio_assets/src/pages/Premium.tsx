@@ -10,11 +10,12 @@ const PremiumPage: React.FC<PremiumPageProps> = () => {
     isPremium, 
     offerings, 
     loading, 
-    error,
     purchase, 
     getOfferings,
     subscriptionTier,
-    customerInfo
+    customerInfo,
+    restorePurchases,
+    isDemoMode
   } = useRevenueCat();
   
   const [purchasing, setPurchasing] = useState<string | null>(null);
@@ -40,6 +41,14 @@ const PremiumPage: React.FC<PremiumPageProps> = () => {
     } finally {
       setPurchasing(null);
     }
+  };
+
+  const handleRestorePurchases = async () => {
+    if (isDemoMode) {
+      alert('In demo mode, this would restore your previous purchases. In production, RevenueCat will automatically restore purchases on app launch.');
+      return;
+    }
+    await restorePurchases();
   };
 
   const premiumFeatures = [
@@ -96,11 +105,19 @@ const PremiumPage: React.FC<PremiumPageProps> = () => {
               : ' Thank you for being a premium subscriber!'}
           </p>
           
+          {/* Demo Mode Badge */}
+          {isDemoMode && (
+            <div className="mt-4 inline-flex items-center gap-2 bg-warning/20 text-warning px-3 py-1 rounded-full text-sm">
+              <span className="w-2 h-2 bg-warning rounded-full animate-pulse"></span>
+              Demo Mode - Simulated Purchases
+            </div>
+          )}
+          
           {/* RevenueCat Debug Info */}
           {customerInfo && (
             <div className="mt-4 p-3 bg-card/50 border border-border rounded-lg text-xs text-textMuted">
-              <p>Customer ID: {customerInfo.originalAppUserID}</p>
-              <p>Entitlements: {Object.keys(customerInfo.entitlements?.active || {}).join(', ') || 'None'}</p>
+              <p>Customer ID: {customerInfo.subscriber?.original_app_user_id}</p>
+              <p>Entitlements: {Object.keys(customerInfo.subscriber?.entitlements?.active || {}).join(', ') || 'None'}</p>
             </div>
           )}
         </div>
@@ -240,10 +257,7 @@ const PremiumPage: React.FC<PremiumPageProps> = () => {
           {!isPremium && (
             <div className="text-center mt-6">
               <button 
-                onClick={() => {
-                  // In a real app, this would call restorePurchases
-                  alert('In demo mode, this would restore your previous purchases. In production, RevenueCat will automatically restore purchases on app launch.');
-                }}
+                onClick={handleRestorePurchases}
                 className="text-sm text-textMuted hover:text-textPrimary underline"
               >
                 Restore Purchases
