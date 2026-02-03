@@ -1,21 +1,62 @@
 {
-  "name": "macrofolio-root",
-  "version": "1.0.0",
+  "name": "macrofolio",
   "private": true,
-  "workspaces": [
-    "src/macrofolio_assets"
-  ],
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "test:contracts": "cd test && npx hardhat test",
-    "test:frontend": "cd src/macrofolio_assets && npm test",
-    "test": "npm run test:contracts && npm run test:frontend",
-    "install:all": "npm install && cd src/macrofolio_assets && npm install"
-  },
-  "devDependencies": {
-    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
-    "hardhat": "^2.22.0"
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "verify:amoy": "hardhat verify --network amoy",
+    "chain": "hardhat node --hostname 0.0.0.0"
   },
   "dependencies": {
-    "react-router-dom": "^7.13.0"
+    "@capacitor/app": "^6.0.0",
+    "@capacitor/browser": "^6.0.0",
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/device": "^6.0.0",
+    "@capacitor/haptics": "^6.0.0",
+    "@capacitor/ios": "^6.0.0",
+    "@capacitor/splash-screen": "^6.0.0",
+    "@capacitor/status-bar": "^6.0.0",
+    "@dfinity/auth-client": "^3.4.3",
+    "@dfinity/principal": "^3.4.3",
+    "@revenuecat/purchases-capacitor": "^6.5.0",
+    "@supabase/supabase-js": "^2.93.3",
+    "dompurify": "^3.0.5",
+    "glob-parent": "^5.1.2",
+    "idb": "^7.1.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-hot-toast": "^2.4.1",
+    "recharts": "^2.8.2",
+    "uuid": "^9.0.0",
+    "viem": "^2.0.0",
+    "wagmi": "^2.0.0",
+    "wagmi-connectors": "^2.0.0"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.1.4",
+    "@testing-library/react": "^14.0.0",
+    "@types/dompurify": "^3.0.5",
+    "@types/jest": "^29.5.4",
+    "@types/node": "^20.4.5",
+    "@types/react": "^18.2.15",
+    "@types/react-dom": "^18.2.7",
+    "@types/uuid": "^9.0.2",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@vitejs/plugin-react": "^4.0.3",
+    "eslint": "^8.45.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.3",
+    "jest": "^29.6.1",
+    "jest-environment-jsdom": "^29.6.1",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.0.2",
+    "vite": "^4.4.5"
   }
 }

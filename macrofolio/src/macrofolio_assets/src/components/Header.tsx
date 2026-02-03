@@ -18,6 +18,7 @@ const Header: React.FC<HeaderProps> = ({
   network,
   isDemoMode,
   onToggleDemoMode,
+  onNavigate,
   ModeSwitcher,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
@@ -31,6 +32,14 @@ const Header: React.FC<HeaderProps> = ({
     { id: 'alerts', label: 'Alerts' },
     { id: 'premium', label: 'Premium', icon: Crown, highlight: true },
   ];
+
+  const handleNavigate = (viewId: string) => {
+    if (onNavigate) {
+      onNavigate(viewId as any);
+    } else {
+      navigate('/' + viewId);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 backdrop-blur-xl bg-bg/80 border-b border-border">
@@ -70,7 +79,7 @@ const Header: React.FC<HeaderProps> = ({
             {navigationItems.map((item) => (
               <button
                 key={item.id}
-                onClick={() => navigate('/' + item.id)}
+                onClick={() => handleNavigate(item.id)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-success/50 flex items-center gap-2 ${
                   currentView === item.id
                     ? 'bg-border text-textPrimary shadow-lg'
@@ -206,7 +215,7 @@ const Header: React.FC<HeaderProps> = ({
                 <button
                   key={item.id}
                   onClick={() => {
-                    navigate('/' + item.id);
+                    handleNavigate(item.id);
                     setMobileMenuOpen(false);
                   }}
                   className={`px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 text-left ${
