@@ -88,4 +88,3 @@ jobs:
         name: macrofolio-android-release
         path: src/macrofolio_assets/android/app/build/outputs/apk/release/app-release-unsigned.apk
         retention-days: 7
-EOF
