@@ -29,3 +29,18 @@ Thumbs.db
 
 # Capacitor
 capacitor.config.ts
+
+# Local submission files
+contest-submission/
+play-store-assets/
+play-store-checklist.md
+privacy-policy.html
+
+# Android/iOS secrets
+*.keystore
+*.jks
+*.p12
+*.cer
+key.properties
+google-services.json
+GoogleService-Info.plist
