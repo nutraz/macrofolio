@@ -44,3 +44,10 @@ privacy-policy.html
 key.properties
 google-services.json
 GoogleService-Info.plist
+
+# SSH keys (NEVER COMMIT)
+sshid
+sshid.pub
+id_*
+*.pem
+*.key
