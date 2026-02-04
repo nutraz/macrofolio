@@ -1,3 +1,6 @@
+import { Capacitor } from '@capacitor/core';
+import { Purchases } from '@revenuecat/purchases-capacitor';
+
 // RevenueCat SDK Integration for Web
 // Using the official @revenuecat/purchases-react-web SDK
 
@@ -50,7 +53,7 @@ class RevenueCatService {
   // Initialize RevenueCat
   async initialize(): Promise<void> {
     if (this.initialized) return;
-    
+
     if (DEMO_MODE) {
       console.log('[RevenueCat] Running in DEMO MODE');
       this.initialized = true;
@@ -63,8 +66,18 @@ class RevenueCatService {
       return;
     }
 
+    try {
+      if (Capacitor.isNativePlatform()) {
+        await Purchases.configure({ apiKey: REVENUECAT_API_KEY });
+        console.log('[RevenueCat] Native SDK configured.');
+      } else {
+        console.log('[RevenueCat] Web platform. Using mock/web implementation.');
+      }
+    } catch (e) {
+      console.error('Failed to initialize RevenueCat', e);
+    }
+
     this.initialized = true;
-    console.log('[RevenueCat] Service initialized with API key');
   }
 
   // Get or create anonymous user ID

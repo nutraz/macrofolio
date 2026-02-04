@@ -1,0 +1,38 @@
+FROM ubuntu:22.04
+
+# Install Java 17
+RUN apt-get update && apt-get install -y \
+    wget \
+    curl \
+    git \
+    unzip \
+    openjdk-17-jdk \
+    nodejs \
+    npm
+
+# Install Android SDK
+RUN wget https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip -O /tmp/cmdline-tools.zip
+RUN mkdir -p /opt/android-sdk/cmdline-tools
+RUN unzip /tmp/cmdline-tools.zip -d /opt/android-sdk/cmdline-tools
+RUN mv /opt/android-sdk/cmdline-tools/cmdline-tools /opt/android-sdk/cmdline-tools/latest
+
+# Set environment variables
+ENV ANDROID_HOME=/opt/android-sdk
+ENV PATH=${PATH}:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools
+
+# Accept licenses
+RUN yes | ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --licenses
+
+WORKDIR /app
+
+# Copy project
+COPY . .
+
+# Build
+RUN npm install
+RUN npm run build
+RUN npx cap add android
+RUN npx cap sync android
+RUN cd android && ./gradlew assembleDebug
+
+CMD ["bash"]

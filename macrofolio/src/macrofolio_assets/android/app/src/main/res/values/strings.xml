@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Macrofolio</string>
+    <string name="title_activity_main">Macrofolio</string>
+    <string name="package_name">com.macrofolio.app</string>
+    <string name="custom_url_scheme">com.macrofolio.app</string>
+</resources>
