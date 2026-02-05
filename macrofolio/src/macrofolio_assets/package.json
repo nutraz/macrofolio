@@ -22,7 +22,7 @@
     "@capacitor/android": "^8.0.2",
     "@dfinity/auth-client": "^3.4.3",
     "@dfinity/principal": "^3.4.3",
-    "@revenuecat/purchases-js": "^1.24.4",
+    "@revenuecat/purchases-capacitor": "^12.0.0",
     "@supabase/supabase-js": "^2.93.3",
     "dompurify": "^3.0.5",
     "glob-parent": "^5.1.2",
@@ -72,3 +72,4 @@
   "author": "",
   "license": "ISC"
 }
+

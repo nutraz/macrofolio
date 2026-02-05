@@ -41,7 +41,7 @@ export default defineConfig({
       input: {
         main: path.resolve(__dirname, 'index.html'),
       },
-      external: ['@revenuecat/purchases-capacitor', '@capacitor/core'],
+      // external: ['@revenuecat/purchases-capacitor', '@capacitor/core'],
       output: {
         manualChunks: {
           react: ['react', 'react-dom'],
