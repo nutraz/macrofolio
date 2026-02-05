@@ -1,16 +1,9 @@
 {
-  "name": "macrofolio",
-  "version": "1.0.0",
-  "type": "module",
+  "name": "macrofolio-root",
+  "private": true,
+  "workspaces": ["macrofolio/src/macrofolio_assets"],
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "@vitejs/plugin-react": "^5.1.2"
-  },
-  "devDependencies": {
-    "vite": "^7.3.1"
+    "build": "cd macrofolio/src/macrofolio_assets && npm run build",
+    "dev": "cd macrofolio/src/macrofolio_assets && npm run dev"
   }
 }
