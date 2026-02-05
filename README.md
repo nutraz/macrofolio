@@ -135,12 +135,15 @@ npm run preview
 **Watch the full demo:** https://youtu.be/5Fve86iO7BI
 
 **Video Highlights:**
-- **0:00-0:30** - App overview & dashboard
-- **0:30-1:00** - Adding multi-asset portfolio
-- **1:00-1:30** - Real-time price tracking
-- **1:30-2:00** - RevenueCat purchase flow
-- **2:00-2:30** - Premium analytics unlocked
-- **2:30-3:00** - On-chain verification
+-Highlights
+
+    [00:05] 📊 Macfolio consolidates all asset types—stocks, crypto, real estate, and NFTs—into a single portfolio dashboard.
+    [00:45] 🏠 Supports logging of non-public market assets like properties and private investments with customizable reminders.
+    [01:10] 💡 Premium subscription unlocks advanced analytics including risk scoring and sector exposure for better portfolio insights.
+    [01:25] 📈 Real-time updates provide instant clarity on total portfolio value and performance trends.
+    [01:50] 🔒 Built on Web3 self-custodial principles, ensuring users retain full control over data with blockchain verification.
+    [02:00] 🚀 Demo mode allows instant app exploration without wallet connection, easing onboarding.
+    [02:15] 🔄 Premium analytics help identify concentration risks and gaps in diversification for smarter investing.
 
 ## 🏆 Contest Requirements Met
 
