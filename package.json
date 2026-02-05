@@ -1,9 +1,7 @@
 {
   "name": "macrofolio-root",
   "private": true,
-  "workspaces": ["macrofolio/src/macrofolio_assets"],
   "scripts": {
-    "build": "cd macrofolio/src/macrofolio_assets && npm run build",
-    "dev": "cd macrofolio/src/macrofolio_assets && npm run dev"
+    "deploy-frontend": "cd macrofolio/src/macrofolio_assets && npm run build"
   }
 }

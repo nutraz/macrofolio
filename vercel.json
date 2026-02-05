@@ -1,6 +1,6 @@
 {
-  "buildCommand": "cd macrofolio/src/macrofolio_assets && npm install && npm run build",
+  "buildCommand": "./build-frontend.sh",
   "outputDirectory": "macrofolio/src/macrofolio_assets/dist",
-  "installCommand": "cd macrofolio/src/macrofolio_assets && npm install",
+  "installCommand": "echo 'Using build script for installation'",
   "framework": "vite"
 }
