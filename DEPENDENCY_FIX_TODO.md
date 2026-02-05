@@ -42,6 +42,15 @@ KEPT frontend dependencies:
 - DFinity, RevenueCat integrations
 - ethers (for blockchain interactions in frontend)
 
+### 3. Updated index.html
+- Copied the landing page content from root index.html to Vite app
+- Landing page will now be served at root URL on Vercel
+
+### 4. Simplified vite.config.ts
+- Removed React plugin (not needed for static landing page)
+- Removed manual chunk splitting
+- Optimized for static HTML output
+
 ## Dependencies to Remove from macrofolio_assets/package.json
 
 Backend dependencies causing conflicts:

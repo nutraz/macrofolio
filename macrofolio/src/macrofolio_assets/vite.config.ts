@@ -1,5 +1,4 @@
 import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
 import path from 'path'
 
 // =============================================================================
@@ -30,7 +29,6 @@ const PUBLIC_ENV_VARS = {
 };
 
 export default defineConfig({
-  plugins: [react()],
   root: path.resolve(__dirname),
   publicDir: 'public',
   build: {
@@ -44,12 +42,6 @@ export default defineConfig({
       output: {
         entryFileNames: `assets/[name].js`,
         chunkFileNames: `assets/[name]-[hash].js`,
-        manualChunks: {
-          react: ['react', 'react-dom', 'react/jsx-runtime'],
-          ethers: ['ethers'],
-          supabase: ['@supabase/supabase-js'],
-          recharts: ['recharts'],
-        },
       },
     },
   },
