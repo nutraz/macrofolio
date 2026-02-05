@@ -1,5 +1,6 @@
 {
-  "framework": "vite",
-  "buildCommand": "cd macrofolio/src/macrofolio_assets && npm run build",
-  "outputDirectory": "macrofolio/src/macrofolio_assets/dist"
+  "buildCommand": "cd macrofolio/src/macrofolio_assets && npm install && npm run build",
+  "outputDirectory": "macrofolio/src/macrofolio_assets/dist",
+  "installCommand": "cd macrofolio/src/macrofolio_assets && npm install",
+  "framework": "vite"
 }
