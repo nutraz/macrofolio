@@ -41,7 +41,10 @@ export default defineConfig({
       input: {
         main: path.resolve(__dirname, 'index.html'),
       },
-      // external: ['@revenuecat/purchases-capacitor', '@capacitor/core'],
+      // Fix for Vercel react/jsx-runtime resolution
+      resolve: {
+        dedupe: ['react', 'react-dom'],
+      },
       output: {
         manualChunks: {
           react: ['react', 'react-dom'],
