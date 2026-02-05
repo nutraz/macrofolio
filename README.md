@@ -1,9 +1,26 @@
 # MACROFOLIO – One Portfolio to Track Them All
 
+<div align="center">
+  <img src="macrofolio/src/macrofolio_assets/public/logo.png" alt="Macrofolio Logo" width="200" />
+</div>
+
 [![Live Demo](https://img.shields.io/badge/Demo-Live-brightgreen)](https://macrofolio.vercel.app)
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue)](https://github.com/nutrazz/macrofolio)
 [![Video Demo](https://img.shields.io/badge/Video-Demo-red)](https://youtu.be/5Fve86iO7BI)
 [![Built with RevenueCat](https://img.shields.io/badge/Built%20with-RevenueCat-FF6B6B)](https://www.revenuecat.com)
+
+> If the live demo does not render immediately due to a cold start or cache,
+> please refresh once. The app is deployed via Vercel using Vite.
+
+---
+
+## 🎯 Creator Brief
+
+**Josh (VisualFaktory): One portfolio to track them all**
+
+Investors juggle stocks, gold, funds, fixed income, real estate, and more across multiple platforms — messy to track and hard to understand at a glance. Josh wants a single app where users can log everything, get real-time price updates where possible, set amortization/reminder alerts for non-listed products, and unlock premium risk + diversification analysis (like country/sector exposure).
+
+---
 
 ## 🏆 RevenueCat Shipyard Contest Submission
 
@@ -75,7 +92,7 @@ Macrofolio solves the fragmentation problem for modern DIY investors by providin
 4. **Lifetime ($299.99)**: One-time payment, lifetime updates
 
 ### Implementation
-- **RevenueCat SDK** integration (`@revenuecat/purchases-js`)
+- **RevenueCat SDK** integration (`@revenuecat/purchases-capacitor`)
 - **Demo mode** for testing without API keys
 - **Production mode** with real subscription processing
 - **Entitlement checking** for premium features
@@ -84,48 +101,65 @@ Macrofolio solves the fragmentation problem for modern DIY investors by providin
 ## 📁 Project Structure
 
 ```
-src/
-├── components/     # React components
-│   ├── Header.tsx
-│   ├── RevenueCatProvider.tsx
-│   └── Toast.tsx
-├── hooks/         # Custom hooks
-│   ├── useRevenueCat.ts
-│   ├── useWallet.ts
-│   └── useAuth.ts
-├── lib/           # Core utilities
-│   ├── revenuecat.ts   # RevenueCat SDK integration
-│   ├── web3.ts         # Blockchain interactions
-│   ├── supabase.ts     # Database client
-│   └── validation.ts   # Zod schemas
-├── pages/         # Application pages
-│   ├── Dashboard.tsx
-│   ├── Portfolio.tsx
-│   ├── Premium.tsx     # RevenueCat subscription
-│   └── Verify.tsx      # On-chain verification
-└── __tests__/     # 45 test cases
-    ├── security.test.ts
-    ├── wallet.test.ts
-    └── verification.test.ts
+macrofolio/src/macrofolio_assets/
+├── public/
+│   └── logo.png                    # App logo
+├── src/
+│   ├── components/
+│   │   └── RevenueCatProvider.tsx  # RevenueCat integration
+│   ├── hooks/
+│   │   └── useRevenueCat.ts        # Subscription hooks
+│   ├── lib/
+│   │   └── revenuecat.ts           # RevenueCat SDK service
+│   ├── pages/
+│   │   ├── Dashboard.tsx           # Main dashboard
+│   │   ├── Portfolio.tsx           # Asset management
+│   │   ├── Premium.tsx             # Subscription page
+│   │   └── Verify.tsx              # On-chain verification
+│   └── App.tsx                    # Main app component
+├── android/                        # Capacitor Android app
+├── capacitor.config.ts            # Capacitor configuration
+└── package.json                   # Dependencies
 ```
 
 ## 🔧 Development
 
 ```bash
+# Navigate to project
+cd macrofolio/src/macrofolio_assets
+
 # Install dependencies (includes RevenueCat SDK)
-npm install
+npm install --legacy-peer-deps
 
 # Start development server
 npm run dev
 
-# Run tests
-npm test
-
 # Build for production
 npm run build
 
-# Preview production build
-npm run preview
+# Build Android APK
+cd android && ./gradlew assembleDebug
+```
+
+## 📱 Android App
+
+The app is configured for Android deployment using Capacitor:
+
+```bash
+# Build web assets
+npm run build
+
+# Sync to native
+npx cap sync
+
+# Open Android Studio
+npx cap open android
+
+# Build APK
+cd android && ./gradlew assembleDebug
+
+# APK location:
+# android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
 ## 📊 Demo Video
@@ -154,14 +188,10 @@ npm run preview
 4. **Written Proposal** - Comprehensive documentation
 
 ### ✅ Bonus Points
-1. **Multi-Platform** - Responsive web + PWA ready
+1. **Mobile Ready** - Android APK built, ready for Play Store
 2. **Innovation** - Hybrid web2/web3 architecture
 3. **Security** - 45 test cases, XSS protection
 4. **User Experience** - Demo-first onboarding
-
-### 📱 Mobile Ready
-- Progressive Web App (PWA) installed
-- Ready for TestFlight/Play Store submission via Capacitor
 
 ## 🎯 Unique Value Proposition
 
@@ -196,22 +226,15 @@ npm run preview
 - **$50M+** potential ARR at 1% penetration
 - **30%+** margins with digital delivery
 
-## 🔮 Roadmap
+## 📄 Essential Documentation
 
-### Q2 2026
-- [ ] iOS/Android app store deployment
-- [ ] AI-powered portfolio recommendations
-- [ ] Tax optimization features
-
-### Q3 2026
-- [ ] Multi-portfolio support (family/business)
-- [ ] API for financial advisors
-- [ ] Social features (anonymous sharing)
-
-### Q4 2026
-- [ ] Institutional tools
-- [ ] DAO governance for feature voting
-- [ ] White-label solutions
+| File | Description |
+|------|-------------|
+| `README.md` | This file - main documentation |
+| `CONTEST_SUBMISSION_READY.md` | Contest submission checklist |
+| `TODO_ANDROID_SETUP.md` | Android build action plan |
+| `MOBILE_APP_STATUS.md` | Mobile app status report |
+| `DEMO_VIDEO_SCRIPT.md` | Demo video script |
 
 ## 👥 Team
 
@@ -232,3 +255,5 @@ MIT License - see LICENSE file for details.
 ---
 
 *Built with ❤️ for the RevenueCat Shipyard Contest 2026*
+*App Logo: macrofolio/src/macrofolio_assets/public/logo.png*
+

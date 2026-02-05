@@ -1,12 +1,5 @@
 {
-  "buildCommand": "cd macrofolio/src/macrofolio_assets && npm install --legacy-peer-deps && npm run build",
-  "outputDirectory": "macrofolio/src/macrofolio_assets/dist",
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
-  ],
-  "github": {
-    "silent": true,
-    "autoJobCancelation": false
-  }
+  "framework": "vite",
+  "buildCommand": "cd macrofolio/src/macrofolio_assets && npm run build",
+  "outputDirectory": "macrofolio/src/macrofolio_assets/dist"
 }
-
