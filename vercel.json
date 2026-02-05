@@ -1,6 +1,11 @@
 {
   "buildCommand": "./build-frontend.sh",
   "outputDirectory": "macrofolio/src/macrofolio_assets/dist",
-  "installCommand": "echo 'Using build script for installation'",
-  "framework": "vite"
+  "installCommand": "echo 'Using build script'",
+  "framework": "static",
+  "rewrites": [
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/:path*", "destination": "/index.html" }
+  ]
 }
+
