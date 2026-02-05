@@ -4,6 +4,7 @@
   "installCommand": "echo 'Using build script'",
   "rewrites": [
     { "source": "/", "destination": "/index.html" },
+    { "source": "/dashboard", "destination": "/dashboard.html" },
     { "source": "/:path*", "destination": "/index.html" }
   ]
 }
