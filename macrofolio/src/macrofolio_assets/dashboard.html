@@ -21,8 +21,26 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script>
-        // Handle /dashboard route by redirecting to React app
-        // The React Router will handle the actual routing
+        // Check authentication before loading dashboard
+        (function() {
+            const isAuthenticated = sessionStorage.getItem('isAuthenticated');
+            const authMethod = sessionStorage.getItem('authMethod');
+            const isDemoMode = sessionStorage.getItem('isDemoMode');
+            
+            if (!isAuthenticated) {
+                // Not authenticated, redirect back to splash
+                window.location.href = '/';
+                return;
+            }
+            
+            // Store auth info for React app to use
+            window.__AUTH__ = {
+                method: authMethod || 'unknown',
+                isDemoMode: isDemoMode === 'true'
+            };
+            
+            console.log('Dashboard loaded with auth:', window.__AUTH__);
+        })();
     </script>
 </body>
 </html>
