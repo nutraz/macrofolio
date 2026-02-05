@@ -41,13 +41,9 @@ export default defineConfig({
       input: {
         main: path.resolve(__dirname, 'index.html'),
       },
-      // Fix for Vercel react/jsx-runtime resolution
-      resolve: {
-        dedupe: ['react', 'react-dom'],
-      },
       output: {
         manualChunks: {
-          react: ['react', 'react-dom'],
+          react: ['react', 'react-dom', 'react/jsx-runtime'],
           ethers: ['ethers'],
           supabase: ['@supabase/supabase-js'],
           recharts: ['recharts'],
