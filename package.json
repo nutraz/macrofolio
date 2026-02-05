@@ -1,7 +1,0 @@
-{
-  "name": "macrofolio-root",
-  "private": true,
-  "scripts": {
-    "deploy-frontend": "cd macrofolio/src/macrofolio_assets && npm run build"
-  }
-}
