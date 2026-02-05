@@ -1,14 +1,15 @@
-import { Capacitor } from '@capacitor/core';
-import { Purchases } from '@revenuecat/purchases-capacitor';
-
 // RevenueCat SDK Integration for Capacitor
-// Using the official @revenuecat/purchases-capacitor SDK
+// Uses dynamic imports to support both web (demo mode) and native platforms
 
-// For Capacitor native apps, we use the native SDK
-// For web preview, we fall back to demo mode
+// Type declarations for native modules
+declare global {
+  const Capacitor: {
+    isNativePlatform(): boolean;
+  };
+}
 
-const REVENUECAT_API_KEY = import.meta.env.VITE_REVENUECAT_API_KEY || '';
-const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true' || !REVENUECAT_API_KEY;
+const REVENUECAT_API_KEY = (import.meta.env?.VITE_REVENUECAT_API_KEY as string) || '';
+const DEMO_MODE = import.meta.env?.VITE_DEMO_MODE === 'true' || !REVENUECAT_API_KEY;
 
 // RevenueCat Customer Info type
 export interface RevenueCatCustomer {
@@ -39,6 +40,7 @@ export interface RevenueCatProduct {
 class RevenueCatService {
   private static instance: RevenueCatService;
   private initialized: boolean = false;
+  private nativePurchases: any = null;
 
   private constructor() {}
 
@@ -49,7 +51,16 @@ class RevenueCatService {
     return RevenueCatService.instance;
   }
 
-  // Initialize RevenueCat
+  // Check if running on native platform
+  private isNative(): boolean {
+    try {
+      return typeof Capacitor !== 'undefined' && Capacitor.isNativePlatform();
+    } catch {
+      return false;
+    }
+  }
+
+  // Initialize RevenueCat - load native SDK only on native platforms
   async initialize(): Promise<void> {
     if (this.initialized) return;
 
@@ -65,10 +76,13 @@ class RevenueCatService {
       return;
     }
 
-    try {
-      if (Capacitor.isNativePlatform()) {
-        // Configure RevenueCat for native platform
-        await Purchases.configure({
+    // Only load native SDK on native platforms
+    if (this.isNative()) {
+      try {
+        const PurchasesModule = await import('@revenuecat/purchases-capacitor');
+        this.nativePurchases = PurchasesModule.Purchases;
+        
+        await this.nativePurchases.configure({
           apiKey: REVENUECAT_API_KEY
         });
         console.log('[RevenueCat] Native SDK configured successfully');
@@ -76,14 +90,13 @@ class RevenueCatService {
         // Set user ID if available
         const appUserId = localStorage.getItem('macrofolio_rc_user_id');
         if (appUserId) {
-          await Purchases.logIn({ appUserId });
+          await this.nativePurchases.logIn({ appUserId });
         }
-      } else {
-        // Web platform - use demo mode
-        console.log('[RevenueCat] Web platform - using demo mode');
+      } catch (e) {
+        console.error('Failed to initialize RevenueCat native SDK', e);
       }
-    } catch (e) {
-      console.error('Failed to initialize RevenueCat', e);
+    } else {
+      console.log('[RevenueCat] Web platform - using demo mode');
     }
 
     this.initialized = true;
@@ -105,17 +118,14 @@ class RevenueCatService {
       return this.getDemoCustomerInfo(appUserId || 'demo_user');
     }
 
-try {
-      if (Capacitor.isNativePlatform()) {
-        // Use native SDK to get customer info
-        const customerInfo = await Purchases.getCustomerInfo();
+    // Try native SDK first
+    if (this.isNative() && this.nativePurchases) {
+      try {
+        const customerInfo = await this.nativePurchases.getCustomerInfo();
         return this.mapNativeCustomerInfo(customerInfo);
-      } else {
-        // Web platform - use demo mode
-        console.log('[RevenueCat] Web platform - using demo mode');
+      } catch (e) {
+        console.error('[RevenueCat] Error fetching customer info:', e);
       }
-    } catch (e) {
-      console.error('[RevenueCat] Error fetching customer info:', e);
     }
 
     console.log('[RevenueCat] Using demo data');
@@ -141,12 +151,12 @@ try {
       return this.getDemoProducts();
     }
 
-try {
-      if (Capacitor.isNativePlatform()) {
-        // Use native SDK to get offerings
-        const offerings = await Purchases.getOfferings();
+    // Try native SDK first
+    if (this.isNative() && this.nativePurchases) {
+      try {
+        const offerings = await this.nativePurchases.getOfferings();
         if (offerings.current) {
-          return offerings.current.availablePackages.map(pkg => ({
+          return offerings.current.availablePackages.map((pkg: any) => ({
             identifier: pkg.product.identifier,
             title: pkg.product.title || 'Premium',
             description: pkg.product.description || 'Premium subscription',
@@ -155,12 +165,9 @@ try {
             periodType: 'normal' as const
           }));
         }
-      } else {
-        // Web platform - use demo mode
-        console.log('[RevenueCat] Web platform - using demo mode');
+      } catch (e) {
+        console.error('[RevenueCat] Error fetching products:', e);
       }
-    } catch (e) {
-      console.error('[RevenueCat] Error fetching products:', e);
     }
 
     return this.getDemoProducts();
@@ -170,34 +177,32 @@ try {
   async purchaseProduct(productId: string): Promise<boolean> {
     if (DEMO_MODE) {
       console.log('[Demo] Simulating purchase of:', productId);
-      // Simulate successful purchase
       const userId = this.getOrCreateAppUserId();
       localStorage.setItem(`macrofolio_purchased_${productId}`, 'true');
       return true;
     }
 
-try {
-      if (Capacitor.isNativePlatform()) {
-        // Use native SDK to purchase
-        const offerings = await Purchases.getOfferings();
+    // Try native SDK first
+    if (this.isNative() && this.nativePurchases) {
+      try {
+        const offerings = await this.nativePurchases.getOfferings();
         if (offerings.current) {
           const pkg = offerings.current.availablePackages.find(
-            p => p.product.identifier === productId
+            (p: any) => p.product.identifier === productId
           );
           if (pkg) {
-            await Purchases.purchasePackage({ identifier: pkg.identifier });
+            await this.nativePurchases.purchasePackage({ identifier: pkg.identifier });
             return true;
           }
         }
-      } else {
-        // Web platform - use demo mode
-        console.log('[RevenueCat] Web platform - using demo mode');
+        return false;
+      } catch (error: any) {
+        console.error('[RevenueCat] Purchase error:', error);
+        return false;
       }
-      return false; // Should not reach here if pkg not found
-    } catch (error: any) {
-      console.error('[RevenueCat] Purchase error:', error);
-      return false;
     }
+
+    return false;
   }
 
   // Restore purchases
@@ -207,21 +212,18 @@ try {
       return true;
     }
 
-try {
-      if (Capacitor.isNativePlatform()) {
-        await Purchases.restorePurchases();
-      } else {
-        // Web platform - use demo mode
-        console.log('[RevenueCat] Web platform - using demo mode');
+    if (this.isNative() && this.nativePurchases) {
+      try {
+        await this.nativePurchases.restorePurchases();
+        return true;
+      } catch (error) {
+        console.error('[RevenueCat] Restore error:', error);
+        return false;
       }
-      return true;
-    } catch (error) {
-      console.error('[RevenueCat] Restore error:', error);
-      return false;
     }
+
+    return true;
   }
-
-
 
   // Check if configured
   isConfigured(): boolean {
@@ -230,7 +232,6 @@ try {
 
   // Demo mode - get demo customer info
   getDemoCustomerInfo(appUserId: string): RevenueCatCustomer {
-    // Check if user has any purchases in localStorage
     const hasMonthly = localStorage.getItem('macrofolio_purchased_macrofolio_monthly_subscription') === 'true';
     const hasYearly = localStorage.getItem('macrofolio_purchased_macrofolio_yearly_subscription') === 'true';
     const hasLifetime = localStorage.getItem('macrofolio_purchased_macrofolio_lifetime_subscription') === 'true';
