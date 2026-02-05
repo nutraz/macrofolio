@@ -42,6 +42,8 @@ export default defineConfig({
         main: path.resolve(__dirname, 'index.html'),
       },
       output: {
+        entryFileNames: `assets/[name].js`,
+        chunkFileNames: `assets/[name]-[hash].js`,
         manualChunks: {
           react: ['react', 'react-dom', 'react/jsx-runtime'],
           ethers: ['ethers'],
