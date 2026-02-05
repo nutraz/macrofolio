@@ -20,103 +20,125 @@
         
         .splash-container {
             text-align: center;
-            animation: fadeIn 0.5s ease-out;
+            animation: fadeIn 0.8s ease-out;
+            max-width: 600px;
+            padding: 40px;
         }
         
         @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .welcome-badge {
+            display: inline-block;
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.5);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 14px;
+            color: #93c5fd;
+            margin-bottom: 25px;
+            animation: fadeIn 0.8s ease-out 0.2s both;
+        }
+        
+        .logo-container {
+            position: relative;
+            margin-bottom: 30px;
+            animation: fadeIn 0.8s ease-out 0.3s both;
         }
         
         .logo {
-            width: 120px;
-            height: 120px;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            border-radius: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 30px;
+            width: 100px;
+            height: 100px;
+            border-radius: 20px;
             box-shadow: 0 20px 60px rgba(59, 130, 246, 0.4);
-            animation: pulse 2s ease-in-out infinite;
+            animation: float 3s ease-in-out infinite;
         }
         
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); box-shadow: 0 20px 60px rgba(59, 130, 246, 0.4); }
-            50% { transform: scale(1.05); box-shadow: 0 25px 80px rgba(59, 130, 246, 0.6); }
-        }
-        
-        .logo-text {
-            font-size: 48px;
-            font-weight: bold;
-            color: white;
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
         }
         
         h1 {
-            font-size: 42px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            font-size: 56px;
+            font-weight: 800;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa, #60a5fa);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            background-size: 200% 200%;
+            animation: gradientShift 3s ease infinite, fadeIn 0.8s ease-out 0.4s both;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
         }
         
         .tagline {
-            font-size: 18px;
+            font-size: 22px;
             color: #94a3b8;
+            margin-bottom: 15px;
+            animation: fadeIn 0.8s ease-out 0.5s both;
+        }
+        
+        .description {
+            font-size: 16px;
+            color: #64748b;
+            line-height: 1.8;
             margin-bottom: 40px;
+            animation: fadeIn 0.8s ease-out 0.6s both;
+        }
+        
+        .features-preview {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            animation: fadeIn 0.8s ease-out 0.7s both;
+        }
+        
+        .feature-badge {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 13px;
+            color: #cbd5e1;
         }
         
         .enter-btn {
             background: linear-gradient(135deg, #3b82f6, #8b5cf6);
             color: white;
             border: none;
-            padding: 16px 48px;
+            padding: 18px 60px;
             font-size: 18px;
             font-weight: 600;
-            border-radius: 12px;
+            border-radius: 14px;
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 10px 40px rgba(59, 130, 246, 0.3);
+            animation: fadeIn 0.8s ease-out 0.8s both;
         }
         
         .enter-btn:hover {
-            transform: translateY(-3px);
+            transform: translateY(-3px) scale(1.02);
             box-shadow: 0 15px 50px rgba(59, 130, 246, 0.5);
         }
         
-        .loading-dots {
-            display: inline-flex;
-            gap: 8px;
-            margin-top: 30px;
+        .enter-btn:active {
+            transform: translateY(0) scale(0.98);
         }
         
-        .loading-dots span {
-            width: 10px;
-            height: 10px;
-            background: #3b82f6;
-            border-radius: 50%;
-            animation: bounce 1.4s ease-in-out infinite both;
-        }
-        
-        .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
-        .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
-        .loading-dots span:nth-child(3) { animation-delay: 0s; }
-        
-        @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
-            40% { transform: scale(1); opacity: 1; }
-        }
-        
-        .auto-redirect {
+        .countdown-text {
             margin-top: 20px;
             font-size: 14px;
-            color: #64748b;
-        }
-        
-        .features {
-            display: none;
+            color: #475569;
+            animation: fadeIn 0.8s ease-out 1s both;
         }
         
         .footer {
@@ -127,27 +149,73 @@
             font-size: 12px;
             color: #475569;
         }
+        
+        .decorative-circle {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.15;
+            z-index: -1;
+        }
+        
+        .circle-1 {
+            width: 400px;
+            height: 400px;
+            background: #3b82f6;
+            top: -100px;
+            left: -100px;
+            animation: pulse 4s ease-in-out infinite;
+        }
+        
+        .circle-2 {
+            width: 300px;
+            height: 300px;
+            background: #8b5cf6;
+            bottom: -50px;
+            right: -50px;
+            animation: pulse 4s ease-in-out infinite 1s;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.15; }
+            50% { transform: scale(1.1); opacity: 0.25; }
+        }
     </style>
 </head>
 <body>
-    <div class="splash-container" id="splash">
-        <div class="logo">
-            <span class="logo-text">M</span>
+    <div class="decorative-circle circle-1"></div>
+    <div class="decorative-circle circle-2"></div>
+    
+    <div class="splash-container">
+        <div class="welcome-badge">
+            Welcome to
         </div>
+        
+        <div class="logo-container">
+            <img src="/logo.png" alt="Macrofolio Logo" class="logo" />
+        </div>
+        
         <h1>MACROFOLIO</h1>
-        <p class="tagline">Track every investment. One portfolio. On-chain.</p>
+        
+        <p class="tagline">One portfolio to rule them all</p>
+        
+        <p class="description">
+            Track stocks, crypto, gold, real estate, and more in one unified dashboard.<br>
+            Get real-time insights and premium risk analysis.
+        </p>
+        
+        <div class="features-preview">
+            <span class="feature-badge">Multi-chain Tracking</span>
+            <span class="feature-badge">Real-time Analytics</span>
+            <span class="feature-badge">Smart Contracts</span>
+            <span class="feature-badge">Wallet Integration</span>
+        </div>
         
         <button class="enter-btn" onclick="enterApp()">
             Enter App
         </button>
         
-        <div class="loading-dots" id="loading">
-            <span></span>
-            <span></span>
-            <span></span>
-        </div>
-        
-        <p class="auto-redirect" id="countdown">
+        <p class="countdown-text">
             Auto-redirecting in <span id="seconds">3</span> seconds...
         </p>
     </div>
@@ -161,11 +229,9 @@
         const secondsEl = document.getElementById('seconds');
         
         function enterApp() {
-            // Redirect to the React dashboard app
             window.location.href = '/dashboard';
         }
         
-        // Auto-redirect countdown
         const countdownInterval = setInterval(() => {
             countdown--;
             secondsEl.textContent = countdown;
@@ -175,10 +241,6 @@
                 enterApp();
             }
         }, 1000);
-        
-        // Hide loading dots when countdown is visible
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('countdown').style.display = 'block';
     </script>
 </body>
 </html>
