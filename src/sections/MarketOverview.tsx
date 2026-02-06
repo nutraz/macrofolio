@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { 
   TrendingUp, TrendingDown, RefreshCw, Bitcoin, Activity, 
-  Clock, Settings, Check, X, Zap, TrendingRight,
-  ArrowUpRight, ArrowDownRight, CircleDot
+  Clock, Settings, Check, X, Zap, ArrowUpRight, ArrowDownRight, CircleDot, ExternalLink
 } from 'lucide-react';
 
 // Asset type definition
@@ -410,7 +409,7 @@ const StatsFooter: React.FC<{ assets: MarketAsset[] }> = ({ assets }) => {
         className="flex items-center gap-1 text-sm text-textMuted hover:text-info transition-colors"
       >
         View on CoinGecko
-        <TrendingRight className="w-4 h-4" />
+        <ExternalLink className="w-4 h-4" />
       </a>
     </div>
   );
