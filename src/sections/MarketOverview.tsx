@@ -1,319 +1,352 @@
-import React, { useState, useEffect } from 'react';
-import { TrendingUp, TrendingDown, RefreshCw, Bitcoin, Flame, DollarSign, Gem, BarChart3, Zap } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { TrendingUp, TrendingDown, RefreshCw, Bitcoin, Flame, DollarSign, Gem, BarChart3, Zap, Activity, Clock, ExternalLink } from 'lucide-react';
 
-// Market asset types
+// Asset type definition
 interface MarketAsset {
   id: string;
   name: string;
   symbol: string;
   price: number;
   change24h: number;
+  marketCap: number;
+  volume24h: number;
   icon: React.ReactNode;
   category: 'crypto' | 'commodity' | 'currency' | 'index';
 }
 
-// Live market data (simulated for demo)
-const INITIAL_MARKET_DATA: MarketAsset[] = [
-  {
-    id: 'btc',
-    name: 'Bitcoin',
-    symbol: 'BTC',
-    price: 67500,
-    change24h: 2.34,
-    icon: <Bitcoin className="w-5 h-5 text-orange-500" />,
-    category: 'crypto'
-  },
-  {
-    id: 'eth',
-    name: 'Ethereum',
-    symbol: 'ETH',
-    price: 3450,
-    change24h: -1.23,
-    icon: <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">Ξ</div>,
-    category: 'crypto'
-  },
-  {
-    id: 'sol',
-    name: 'Solana',
-    symbol: 'SOL',
-    price: 175.50,
-    change24h: 5.67,
-    icon: <div className="w-5 h-5 rounded-full bg-gradient-to-br from-purple-500 to-cyan-400 flex items-center justify-center text-white text-xs font-bold">S</div>,
-    category: 'crypto'
-  },
-  {
-    id: 'gold',
-    name: 'Gold',
-    symbol: 'XAU',
-    price: 2045.30,
-    change24h: 0.45,
-    icon: <Gem className="w-5 h-5 text-yellow-500" />,
-    category: 'commodity'
-  },
-  {
-    id: 'silver',
-    name: 'Silver',
-    symbol: 'XAG',
-    price: 23.45,
-    change24h: -0.78,
-    icon: <div className="w-5 h-5 rounded-full bg-gray-400 flex items-center justify-center text-white text-xs font-bold">Ag</div>,
-    category: 'commodity'
-  },
-  {
-    id: 'dxy',
-    name: 'US Dollar Index',
-    symbol: 'DXY',
-    price: 103.85,
-    change24h: 0.12,
-    icon: <DollarSign className="w-5 h-5 text-green-600" />,
-    category: 'currency'
-  },
-  {
-    id: 'sp500',
-    name: 'S&P 500',
-    symbol: 'SPX',
-    price: 5234.18,
-    change24h: 0.89,
-    icon: <BarChart3 className="w-5 h-5 text-blue-600" />,
-    category: 'index'
-  },
-  {
-    id: 'nasdaq',
-    name: 'NASDAQ',
-    symbol: 'NDX',
-    price: 16428.82,
-    change24h: 1.23,
-    icon: <Flame className="w-5 h-5 text-orange-600" />,
-    category: 'index'
-  },
+// Asset configuration with API IDs
+const ASSET_CONFIG = [
+  { id: 'bitcoin', symbol: 'BTC', name: 'Bitcoin', category: 'crypto' as const, color: 'orange' },
+  { id: 'ethereum', symbol: 'ETH', name: 'Ethereum', category: 'crypto' as const, color: 'blue' },
+  { id: 'solana', symbol: 'SOL', name: 'Solana', category: 'crypto' as const, color: 'purple' },
+  { id: 'binancecoin', symbol: 'BNB', name: 'BNB', category: 'crypto' as const, color: 'yellow' },
+  { id: 'ripple', symbol: 'XRP', name: 'XRP', category: 'crypto' as const, color: 'gray' },
+  { id: 'cardano', symbol: 'ADA', name: 'Cardano', category: 'crypto' as const, color: 'blue' },
+  { id: 'gold', symbol: 'XAU', name: 'Gold', category: 'commodity' as const, color: 'yellow' },
+  { id: 'silver', symbol: 'XAG', name: 'Silver', category: 'commodity' as const, color: 'gray' },
 ];
 
-// Sparkline component for mini charts
-const Sparkline: React.FC<{ data: number[]; color: string; isPositive: boolean }> = ({ data, color, isPositive }) => {
+// Get icon based on color
+const getIcon = (id: string, color: string) => {
+  const iconMap: { [key: string]: React.ReactNode } = {
+    orange: <Bitcoin className="w-5 h-5 text-orange-500" />,
+    blue: <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">Ξ</div>,
+    purple: <div className="w-5 h-5 rounded-full bg-gradient-to-br from-purple-500 to-cyan-400 flex items-center justify-center text-white text-xs font-bold">S</div>,
+    yellow: <div className="w-5 h-5 rounded-full bg-yellow-500 flex items-center justify-center text-white text-xs font-bold">$</div>,
+    gray: <div className="w-5 h-5 rounded-full bg-gray-400 flex items-center justify-center text-white text-xs font-bold">X</div>,
+  };
+  return iconMap[color] || <div className="w-5 h-5 rounded-full bg-gray-500" />;
+};
+
+// Format currency
+const formatCurrency = (value: number, maxDecimals = 2) => {
+  if (value >= 1e12) return `$${(value / 1e12).toFixed(2)}T`;
+  if (value >= 1e9) return `$${(value / 1e9).toFixed(2)}B`;
+  if (value >= 1e6) return `$${(value / 1e6).toFixed(2)}M`;
+  return value.toLocaleString('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: value < 1 ? 4 : maxDecimals,
+    maximumFractionDigits: value < 1 ? 6 : maxDecimals,
+  });
+};
+
+// Sparkline chart component
+const Sparkline: React.FC<{ data: number[]; color: string; width?: number; height?: number }> = ({ 
+  data, 
+  color, 
+  width = 120, 
+  height = 40 
+}) => {
+  if (!data || data.length < 2) return null;
+
   const min = Math.min(...data);
   const max = Math.max(...data);
   const range = max - min || 1;
-  
+
   const points = data.map((value, index) => {
-    const x = (index / (data.length - 1)) * 100;
-    const y = 100 - ((value - min) / range) * 100;
+    const x = (index / (data.length - 1)) * width;
+    const y = height - ((value - min) / range) * height;
     return `${x},${y}`;
   }).join(' ');
 
+  const isPositive = data[data.length - 1] >= data[0];
+  const strokeColor = isPositive ? '#22c55e' : '#ef4444';
+
   return (
-    <svg className="w-24 h-10" viewBox="0 0 100 100" preserveAspectRatio="none">
-      <polyline
+    <svg width={width} height={height} className="overflow-visible">
+      <defs>
+        <linearGradient id={`gradient-${color}`} x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor={strokeColor} stopOpacity="0.3" />
+          <stop offset="100%" stopColor={strokeColor} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path
+        d={`M ${points}`}
         fill="none"
-        stroke={color}
+        stroke={strokeColor}
         strokeWidth="2"
-        points={points}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <circle 
-        cx={100} 
-        cy={isPositive ? ((max - data[data.length - 1]) / range) * 100 : ((data[data.length - 1] - min) / range) * 100} 
-        r="3" 
-        fill={color} 
+      <circle
+        cx={width}
+        cy={height - ((data[data.length - 1] - min) / range) * height}
+        r="3"
+        fill={strokeColor}
+        className="transition-all duration-300"
       />
     </svg>
   );
 };
 
 const MarketOverview: React.FC = () => {
-  const [marketData, setMarketData] = useState<MarketAsset[]>(INITIAL_MARKET_DATA);
-  const [sparklineData, setSparklineData] = useState<{ [key: string]: number[] }>({});
+  const [marketData, setMarketData] = useState<MarketAsset[]>([]);
+  const [historicalData, setHistoricalData] = useState<{ [key: string]: number[] }>({});
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState(new Date());
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  // Generate initial sparkline data
-  useEffect(() => {
-    const generateSparkline = (basePrice: number) => {
-      const points = 20;
-      return Array.from({ length: points }, (_, i) => {
-        const volatility = 0.02;
-        const change = (Math.random() - 0.5) * volatility * basePrice;
-        return basePrice + change * (i + 1);
+  // Fetch live data from CoinGecko API
+  const fetchMarketData = useCallback(async (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
+    else setLoading(true);
+    setError(null);
+
+    try {
+      const ids = ASSET_CONFIG.map(a => a.id).join(',');
+      const response = await fetch(
+        `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids}&order=market_cap_desc&per_page=10&page=1&sparkline=true&price_change_percentage=24h`
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch market data');
+      }
+
+      const data = await response.json();
+
+      // Map API data to our format
+      const assets: MarketAsset[] = data.map((coin: any) => {
+        const config = ASSET_CONFIG.find(a => a.id === coin.id);
+        return {
+          id: coin.id,
+          name: coin.name,
+          symbol: coin.symbol.toUpperCase(),
+          price: coin.current_price,
+          change24h: coin.price_change_percentage_24h,
+          marketCap: coin.market_cap,
+          volume24h: coin.total_volume,
+          icon: getIcon(coin.id, config?.color || 'gray'),
+          category: config?.category || 'crypto',
+        };
       });
-    };
 
-    const sparklines: { [key: string]: number[] } = {};
-    INITIAL_MARKET_DATA.forEach(asset => {
-      sparklines[asset.id] = generateSparkline(asset.price);
-    });
-    setSparklineData(sparklines);
+      // Store historical data for sparklines
+      const history: { [key: string]: number[] } = {};
+      data.forEach((coin: any) => {
+        history[coin.id] = coin.sparkline_in_7d?.price || [];
+      });
+
+      setMarketData(assets);
+      setHistoricalData(history);
+      setLastUpdated(new Date());
+    } catch (err) {
+      console.error('Error fetching market data:', err);
+      setError('Unable to load market data. Using cached values.');
+      // Keep existing data on error
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   }, []);
 
-  // Simulate live price updates
+  // Initial fetch
   useEffect(() => {
-    const interval = setInterval(() => {
-      setMarketData(prev => prev.map(asset => {
-        const changePercent = (Math.random() * 0.5 - 0.25); // -0.25% to +0.25%
-        const newPrice = asset.price * (1 + changePercent / 100);
-        
-        // Update sparkline
-        setSparklineData(sparklines => ({
-          ...sparklines,
-          [asset.id]: [...(sparklines[asset.id] || []).slice(1), newPrice]
-        }));
+    fetchMarketData();
 
-        return {
-          ...asset,
-          price: newPrice,
-        };
-      }));
-    }, 5000); // Update every 5 seconds
+    // Auto-refresh every 60 seconds
+    const interval = setInterval(() => {
+      fetchMarketData(true);
+    }, 60000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchMarketData]);
 
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    setMarketData(prev => prev.map(asset => {
-      const change = (Math.random() * 4) - 2; // -2% to +2%
-      const newPrice = asset.price * (1 + change / 100);
-      
-      setSparklineData(sparklines => ({
-        ...sparklines,
-        [asset.id]: [...(sparklines[asset.id] || []).slice(1), newPrice]
-      }));
-
-      return {
-        ...asset,
-        price: newPrice,
-        change24h: asset.change24h + (Math.random() * 0.5 - 0.25),
-      };
-    }));
-    
-    setLastUpdated(new Date());
-    setRefreshing(false);
+  const handleRefresh = () => {
+    fetchMarketData(true);
   };
 
-  const formatPrice = (price: number, category: string) => {
-    if (category === 'commodity' || category === 'index') {
-      return price.toLocaleString('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      });
-    }
-    return price.toLocaleString('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: price < 100 ? 2 : 0,
-      maximumFractionDigits: price < 100 ? 2 : 0,
-    });
+  // Get change color class
+  const getChangeClass = (change: number) => {
+    if (change > 0) return 'text-success';
+    if (change < 0) return 'text-danger';
+    return 'text-textMuted';
   };
 
-  const formatChange = (change: number) => {
-    const isPositive = change >= 0;
+  // Loading skeleton
+  if (loading && marketData.length === 0) {
     return (
-      <span className={`flex items-center gap-0.5 text-sm ${isPositive ? 'text-success' : 'text-danger'}`}>
-        {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-        {Math.abs(change).toFixed(2)}%
-      </span>
+      <div className="bg-gradient-to-br from-card to-card/50 border border-border rounded-2xl p-6 shadow-card-glow">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-info/10 rounded-lg">
+              <Activity className="w-5 h-5 text-info animate-pulse" />
+            </div>
+            <div>
+              <div className="h-5 w-40 bg-border rounded animate-pulse" />
+              <div className="h-4 w-24 bg-border rounded animate-pulse mt-2" />
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="bg-bg/50 rounded-xl p-4 animate-pulse">
+              <div className="h-4 w-20 bg-border rounded mb-3" />
+              <div className="h-6 w-24 bg-border rounded mb-2" />
+              <div className="h-4 w-16 bg-border rounded" />
+            </div>
+          ))}
+        </div>
+      </div>
     );
-  };
+  }
+
+  // Error state
+  if (error && marketData.length === 0) {
+    return (
+      <div className="bg-gradient-to-br from-card to-card/50 border border-border rounded-2xl p-6 shadow-card-glow">
+        <div className="flex items-center justify-center py-8">
+          <div className="text-center">
+            <div className="p-3 bg-danger/10 rounded-full inline-block mb-4">
+              <Activity className="w-8 h-8 text-danger" />
+            </div>
+            <p className="text-textPrimary mb-4">{error}</p>
+            <button onClick={handleRefresh} className="btn-primary">
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gradient-to-br from-card to-card/50 border border-border rounded-2xl p-6 shadow-card-glow">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-info/10 rounded-lg">
-            <BarChart3 className="w-5 h-5 text-info" />
+            <Activity className="w-5 h-5 text-info" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-textPrimary">Market Overview</h3>
+            <h3 className="text-lg font-semibold text-textPrimary">Live Market Overview</h3>
             <p className="text-xs text-textMuted flex items-center gap-1">
               <Zap className="w-3 h-3" />
-              Live prices • Updated {lastUpdated.toLocaleTimeString()}
+              Real-time prices • Powered by CoinGecko
             </p>
           </div>
         </div>
         
-        <button
-          onClick={handleRefresh}
-          disabled={refreshing}
-          className="btn-secondary text-sm flex items-center gap-2"
-        >
-          <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-          {refreshing ? 'Updating...' : 'Refresh'}
-        </button>
+        <div className="flex items-center gap-3">
+          {lastUpdated && (
+            <span className="text-xs text-textMuted flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              {lastUpdated.toLocaleTimeString()}
+            </span>
+          )}
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="btn-secondary text-sm flex items-center gap-2"
+          >
+            <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+            {refreshing ? 'Updating...' : 'Refresh'}
+          </button>
+        </div>
       </div>
 
       {/* Market Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {marketData.map((asset) => (
           <div
             key={asset.id}
-            className="bg-bg/50 rounded-xl p-4 border border-border hover:border-info/30 transition-all duration-200 group cursor-pointer"
+            className="group bg-bg/50 rounded-xl p-4 border border-border hover:border-info/30 transition-all duration-300 hover:shadow-lg hover:shadow-info/5 cursor-pointer"
           >
             {/* Asset Header */}
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 {asset.icon}
                 <div>
-                  <p className="text-sm font-medium text-textPrimary">{asset.symbol}</p>
+                  <p className="text-sm font-semibold text-textPrimary">{asset.symbol}</p>
                   <p className="text-xs text-textMuted">{asset.name}</p>
                 </div>
               </div>
+              <span className={`text-xs px-2 py-1 rounded-full ${
+                asset.change24h >= 0 
+                  ? 'bg-success/10 text-success' 
+                  : 'bg-danger/10 text-danger'
+              }`}>
+                {asset.change24h >= 0 ? '+' : ''}{asset.change24h.toFixed(2)}%
+              </span>
             </div>
 
             {/* Price */}
-            <p className="text-lg font-bold text-textPrimary mb-2">
-              {formatPrice(asset.price, asset.category)}
+            <p className="text-xl font-bold text-textPrimary mb-2">
+              {formatCurrency(asset.price)}
             </p>
 
-            {/* Change & Sparkline */}
-            <div className="flex items-center justify-between">
-              {formatChange(asset.change24h)}
-              <Sparkline
-                data={sparklineData[asset.id] || []}
-                color={asset.change24h >= 0 ? '#22c55e' : '#ef4444'}
-                isPositive={asset.change24h >= 0}
+            {/* Sparkline & Stats */}
+            <div className="flex items-end justify-between">
+              <div className="flex flex-col">
+                <span className="text-xs text-textMuted">MCap</span>
+                <span className="text-xs text-textPrimary font-medium">
+                  {formatCurrency(asset.marketCap, 0)}
+                </span>
+              </div>
+              <Sparkline 
+                data={historicalData[asset.id] || []} 
+                color={asset.id}
+                width={80}
+                height={30}
               />
             </div>
           </div>
         ))}
       </div>
 
-      {/* Quick Stats */}
-      <div className="mt-6 pt-4 border-t border-border">
-        <div className="grid grid-cols-4 gap-4 text-center">
-          <div>
-            <p className="text-xs text-textMuted mb-1">Top Gainer</p>
-            <p className="text-sm font-semibold text-success flex items-center justify-center gap-1">
-              <TrendingUp className="w-3 h-3" />
-              SOL +5.67%
-            </p>
+      {/* Quick Stats Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-border">
+        <div className="flex flex-wrap items-center gap-6">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-success" />
+            <span className="text-sm text-textMuted">Top Gainer:</span>
+            <span className="text-sm font-semibold text-success">
+              {marketData.length > 0 
+                ? `${marketData.reduce((a, b) => a.change24h > b.change24h ? a : b).symbol} +${marketData.reduce((a, b) => a.change24h > b.change24h ? a : b).change24h.toFixed(2)}%`
+                : 'N/A'}
+            </span>
           </div>
-          <div>
-            <p className="text-xs text-textMuted mb-1">Top Loser</p>
-            <p className="text-sm font-semibold text-danger flex items-center justify-center gap-1">
-              <TrendingDown className="w-3 h-3" />
-              XAG -0.78%
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-textMuted mb-1">Market Sentiment</p>
-            <p className="text-sm font-semibold text-warning flex items-center justify-center gap-1">
-              <Flame className="w-3 h-3" />
-              Neutral
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-textMuted mb-1">24h Volume</p>
-            <p className="text-sm font-semibold text-info flex items-center justify-center gap-1">
-              <BarChart3 className="w-3 h-3" />
-              $128B
-            </p>
+          <div className="flex items-center gap-2">
+            <TrendingDown className="w-4 h-4 text-danger" />
+            <span className="text-sm text-textMuted">Top Loser:</span>
+            <span className="text-sm font-semibold text-danger">
+              {marketData.length > 0 
+                ? `${marketData.reduce((a, b) => a.change24h < b.change24h ? a : b).symbol} ${marketData.reduce((a, b) => a.change24h < b.change24h ? a : b).change24h.toFixed(2)}%`
+                : 'N/A'}
+            </span>
           </div>
         </div>
+        
+        <a
+          href="https://www.coingecko.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1 text-xs text-textMuted hover:text-info transition-colors"
+        >
+          View on CoinGecko
+          <ExternalLink className="w-3 h-3" />
+        </a>
       </div>
     </div>
   );
