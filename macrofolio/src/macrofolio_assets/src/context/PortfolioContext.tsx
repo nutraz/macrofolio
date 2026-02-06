@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { useAlerts } from './AlertsContext';
 
 // Asset type definition
 export interface Asset {
@@ -128,6 +129,9 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState<PortfolioSummary | null>(null);
+  
+  // Get alerts context to feed price updates
+  const { setCurrentPrices } = useAlerts();
 
   // Load demo assets on mount
   useEffect(() => {
@@ -149,6 +153,20 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({
     
     loadAssets();
   }, [isDemoMode]);
+
+  // Feed price updates to alerts system whenever assets change
+  useEffect(() => {
+    if (assets.length === 0) return;
+    
+    // Build price map from current assets
+    const priceMap: Record<string, number> = {};
+    assets.forEach(asset => {
+      priceMap[asset.id] = asset.currentPrice;
+    });
+    
+    // Feed to alerts system
+    setCurrentPrices(priceMap);
+  }, [assets, setCurrentPrices]);
 
   // Calculate summary when assets change
   useEffect(() => {

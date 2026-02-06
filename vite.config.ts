@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
-import path from 'path'
+import react from '@vitejs/plugin-react'
+import { resolve } from 'path'
 
 // =============================================================================
 // SECURITY: Explicit allow-list for environment variables
@@ -18,24 +19,20 @@ const PUBLIC_ENV_VARS = {
 };
 
 export default defineConfig({
-  root: path.resolve(__dirname),
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, './src'),
+    },
+  },
   publicDir: 'public',
   build: {
     outDir: 'dist',
     emptyOutDir: true,
-    rollupOptions: {
-      input: {
-        main: path.resolve(__dirname, 'index.html'),
-      },
-      output: {
-        entryFileNames: `assets/[name].js`,
-        chunkFileNames: `assets/[name]-[hash].js`,
-      },
-    },
   },
   server: {
     port: 5173,
-    allowedHosts: ['.netlify.app'],
+    allowedHosts: true,
   },
   define: {
     'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(PUBLIC_ENV_VARS.VITE_SUPABASE_URL),

@@ -1,6 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Wallet, Settings, Bell, Search, Menu, X, Zap, CheckCircle, Crown, Globe, Fingerprint } from 'lucide-react';
+import { useAlerts } from '../hooks/useAlerts';
+import AlertBadge from './alerts/AlertBadge';
 
 interface HeaderProps {
   currentView: string;
@@ -23,6 +25,7 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const navigate = useNavigate();
+  const { triggeredAlerts } = useAlerts();
   
   const navigationItems = [
     { id: 'dashboard', label: 'Dashboard' },
@@ -136,14 +139,11 @@ const Header: React.FC<HeaderProps> = ({
 
             {/* Action Buttons */}
             <div className="flex items-center gap-1">
-              {/* Notifications */}
-              <button 
-                className="relative p-2 rounded-lg hover:bg-card/50 text-textMuted hover:text-textPrimary transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-success/50"
-                aria-label="Notifications - 1 unread"
-              >
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-success rounded-full animate-pulse" aria-hidden="true"></span>
-              </button>
+              {/* Alerts Notification Badge */}
+              <AlertBadge 
+                count={triggeredAlerts.length} 
+                onClick={() => handleNavigate('alerts')}
+              />
 
               {/* Settings */}
               <button 

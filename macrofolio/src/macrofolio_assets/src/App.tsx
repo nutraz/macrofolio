@@ -13,6 +13,7 @@ import { ToastProvider } from './components/Toast';
 import { useAuth } from './hooks/useAuth';
 import { useWallet } from './hooks/useWallet';
 import { PortfolioProvider } from './context/PortfolioContext';
+import { AlertsProvider } from './context/AlertsContext';
 
 import { Activity, Database, Zap, ExternalLink, ShieldAlert } from 'lucide-react';
 
@@ -395,9 +396,11 @@ function App() {
       <ToastProvider>
         <WalletProviderContent
           onWalletData={(walletData) => (
-            <PortfolioProvider isDemoMode={true}>
-              <AppContent walletData={walletData} />
-            </PortfolioProvider>
+            <AlertsProvider isDemoMode={true}>
+              <PortfolioProvider isDemoMode={true}>
+                <AppContent walletData={walletData} />
+              </PortfolioProvider>
+            </AlertsProvider>
           )}
         />
       </ToastProvider>
