@@ -3,6 +3,7 @@ import PortfolioSummary from '../sections/PortfolioSummary';
 import PerformanceChart from '../sections/PerformanceChart';
 import Allocation from '../sections/Allocation';
 import AssetsTable from '../sections/AssetsTable';
+import MarketOverview from '../sections/MarketOverview';
 import DashboardLogo from '../components/DashboardLogo';
 import { Layers, Shield, Zap, RefreshCw } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext';
@@ -141,6 +142,9 @@ const Dashboard: React.FC<DashboardProps> = ({ assetTypes, loading: authLoading,
           </div>
         </div>
       )}
+
+      {/* Market Overview - Live Market Data */}
+      <MarketOverview />
 
       {/* Portfolio Summary - Hero Section */}
       <PortfolioSummary 
