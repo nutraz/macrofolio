@@ -1,0 +1,63 @@
+/* App.css - Minimal global styles (duplicates removed)
+ * Most styles are now in index.css via Tailwind utilities
+ */
+
+/* Base font settings - only what's not covered by Tailwind */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom spinner - only this animation needed beyond Tailwind */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Utility class for custom spinners */
+.spinner {
+  border: 3px solid rgba(59, 130, 246, 0.2);
+  border-radius: 50%;
+  border-top: 3px solid #3b82f6;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+/* Legacy class mappings for backward compatibility */
+.card { @apply backdrop-blur-xl bg-card/80 border border-border rounded-xl; }
+.data-table { @apply table-container; }
+.hide-mobile { @apply md:hidden; }
+.hide-desktop { @apply hidden md:block; }
+
+/* Toast Animations */
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-out-right {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out forwards;
+}
+
+.animate-slide-out-right {
+  animation: slide-out-right 0.3s ease-in forwards;
+}
+
