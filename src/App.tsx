@@ -206,6 +206,7 @@ const AppContent: React.FC<{
 
   // Demo mode detection from environment variable
   // Defaults to true for demo mode if not explicitly set
+  // But we still need to show landing page first!
   const [isDemoMode, setIsDemoMode] = useState(() => {
     const demoMode = import.meta.env.VITE_DEMO_MODE;
     // Only disable demo mode if explicitly set to "false"
@@ -213,6 +214,7 @@ const AppContent: React.FC<{
   });
   const [currentView, setCurrentView] = useState<'dashboard' | 'portfolio' | 'analytics' | 'alerts' | 'verify' | 'premium'>('dashboard');
   const [demoLoading, setDemoLoading] = useState(true);
+  const [hasEnteredDemo, setHasEnteredDemo] = useState(false);
 
   // Check if this is a shareable/landing page link
   const [isLandingPage, setIsLandingPage] = useState(false);
@@ -229,14 +231,32 @@ const AppContent: React.FC<{
 
   // Demo mode loading effect
   useEffect(() => {
-    if (isDemoMode && !user) {
+    if (isDemoMode && !hasEnteredDemo) {
+      setDemoLoading(false); // Don't show loading, show splash
+    } else if (isDemoMode && hasEnteredDemo) {
       setTimeout(() => {
         setDemoLoading(false);
       }, 1500);
     } else {
       setDemoLoading(false);
     }
-  }, [isDemoMode, user]);
+  }, [isDemoMode, hasEnteredDemo]);
+
+  // Handle demo entry from Splash
+  const handleEnterDemo = () => {
+    setHasEnteredDemo(true);
+    // Store in sessionStorage so refresh maintains demo mode
+    sessionStorage.setItem('isDemoMode', 'true');
+    sessionStorage.setItem('hasEnteredDemo', 'true');
+  };
+
+  // Load saved demo state on mount
+  useEffect(() => {
+    const savedDemo = sessionStorage.getItem('hasEnteredDemo');
+    if (savedDemo === 'true') {
+      setHasEnteredDemo(true);
+    }
+  }, []);
 
   // Determine authentication method and connection state
   const getAuthMethod = (): 'metamask' | 'supabase' | null => {
@@ -247,7 +267,8 @@ const AppContent: React.FC<{
 
   const authMethod = getAuthMethod();
   // Show landing page for shareable links, otherwise use normal connection logic
-  const isConnected = isLandingPage ? false : (isDemoMode || walletConnected || !!user);
+  // Only show dashboard if user has explicitly entered demo mode OR connected wallet
+  const isConnected = isLandingPage ? false : (hasEnteredDemo || walletConnected || !!user);
 
   // Display address based on auth method
   const displayAddress = isDemoMode
@@ -292,6 +313,7 @@ const AppContent: React.FC<{
         onToggleDemoMode={toggleDemoMode}
         isMetaMaskInstalled={isMetaMaskInstalled}
         walletLoading={walletLoading}
+        onEnterDemo={handleEnterDemo}
       />;
     }
 

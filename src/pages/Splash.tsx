@@ -7,6 +7,7 @@ interface SplashProps {
   onToggleDemoMode: () => void;
   isMetaMaskInstalled: boolean;
   walletLoading?: boolean;
+  onEnterDemo: () => void;
 }
 
 const Splash: React.FC<SplashProps> = ({
@@ -14,7 +15,8 @@ const Splash: React.FC<SplashProps> = ({
   isDemoMode, 
   onToggleDemoMode, 
   isMetaMaskInstalled,
-  walletLoading = false
+  walletLoading = false,
+  onEnterDemo
 }) => {
   return (
     <div className="max-w-6xl mx-auto animate-fade-in">
@@ -97,7 +99,7 @@ const Splash: React.FC<SplashProps> = ({
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           {isDemoMode ? (
             <button
-              onClick={() => window.location.reload()}
+              onClick={onEnterDemo}
               className="btn-primary px-8 py-4 text-lg flex items-center justify-center transition-all duration-300 hover:shadow-glow-blue"
             >
               Enter Demo
