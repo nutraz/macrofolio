@@ -23,9 +23,19 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     emptyOutDir: true,
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, 'index.html'),
+      },
+      output: {
+        entryFileNames: `assets/[name].js`,
+        chunkFileNames: `assets/[name]-[hash].js`,
+      },
+    },
   },
   server: {
     port: 5173,
+    allowedHosts: ['.netlify.app'],
   },
   define: {
     'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(PUBLIC_ENV_VARS.VITE_SUPABASE_URL),
