@@ -1,42 +1,44 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { 
   TrendingUp, TrendingDown, RefreshCw, Bitcoin, Activity, 
-  Clock, Settings, Check, X, Zap, ArrowUpRight, ArrowDownRight, CircleDot, ExternalLink
+  Clock, Settings, Check, X, Zap, ArrowUpRight, ArrowDownRight, 
+  CircleDot, ExternalLink, Wifi, WifiOff
 } from 'lucide-react';
 
 // Asset type definition
 interface MarketAsset {
   id: string;
-  name: string;
   symbol: string;
+  name: string;
   price: number;
   change24h: number;
-  change7d?: number;
-  marketCap: number;
+  changePercent24h: number;
+  high24h: number;
+  low24h: number;
   volume24h: number;
   icon: React.ReactNode;
-  category: 'crypto' | 'commodity' | 'currency' | 'index';
-  isVisible: boolean;
+  color: string;
+  binanceSymbol: string;
 }
 
-// All available assets to track
-const ALL_ASSETS = [
-  { id: 'bitcoin', symbol: 'BTC', name: 'Bitcoin', category: 'crypto' as const, color: 'orange' },
-  { id: 'ethereum', symbol: 'ETH', name: 'Ethereum', category: 'crypto' as const, color: 'blue' },
-  { id: 'solana', symbol: 'SOL', name: 'Solana', category: 'crypto' as const, color: 'purple' },
-  { id: 'binancecoin', symbol: 'BNB', name: 'BNB', category: 'crypto' as const, color: 'yellow' },
-  { id: 'ripple', symbol: 'XRP', name: 'XRP', category: 'crypto' as const, color: 'gray' },
-  { id: 'cardano', symbol: 'ADA', name: 'Cardano', category: 'crypto' as const, color: 'blue' },
-  { id: 'avalanche-2', symbol: 'AVAX', name: 'Avalanche', category: 'crypto' as const, color: 'red' },
-  { id: 'polkadot', symbol: 'DOT', name: 'Polkadot', category: 'crypto' as const, color: 'pink' },
-  { id: 'chainlink', symbol: 'LINK', name: 'Chainlink', category: 'crypto' as const, color: 'blue' },
-  { id: 'polygon', symbol: 'MATIC', name: 'Polygon', category: 'crypto' as const, color: 'purple' },
-  { id: 'dogecoin', symbol: 'DOGE', name: 'Dogecoin', category: 'crypto' as const, color: 'yellow' },
-  { id: 'shiba-inu', symbol: 'SHIB', name: 'Shiba Inu', category: 'crypto' as const, color: 'brown' },
+// All available assets to track (using Binance symbols)
+const ALL_ASSETS: MarketAsset[] = [
+  { id: 'bitcoin', symbol: 'BTC', name: 'Bitcoin', price: 0, change24h: 0, changePercent24h: 0, high24h: 0, low24h: 0, volume24h: 0, icon: null, color: 'orange', binanceSymbol: 'btcusdt' },
+  { id: 'ethereum', symbol: 'ETH', name: 'Ethereum', price: 0, change24h: 0, changePercent24h: 0, high24h: 0, low24h: 0, volume24h: 0, icon: null, color: 'blue', binanceSymbol: 'ethusdt' },
+  { id: 'solana', symbol: 'SOL', name: 'Solana', price: 0, change24h: 0, changePercent24h: 0, high24h: 0, low24h: 0, volume24h: 0, icon: null, color: 'purple', binanceSymbol: 'solusdt' },
+  { id: 'binancecoin', symbol: 'BNB', name: 'BNB', price: 0, change24h: 0, changePercent24h: 0, high24h: 0, low24h: 0, volume24h: 0, icon: null, color: 'yellow', binanceSymbol: 'bnbusdt' },
+  { id: 'ripple', symbol: 'XRP', name: 'XRP', price: 0, change24h: 0, changePercent24h: 0, high24h: 0, low24h: 0, volume24h: 0, icon: null, color: 'gray', binanceSymbol: 'xrpusdt' },
+  { id: 'cardano', symbol: 'ADA', name: 'Cardano', price: 0, change24h: 0, changePercent24h: 0, high24h: 0, low24h: 0, volume24h: 0, icon: null, color: 'blue', binanceSymbol: 'adausdt' },
+  { id: 'avalanche', symbol: 'AVAX', name: 'Avalanche', price: 0, change24h: 0, changePercent24h: 0, high24h: 0, low24h: 0, volume24h: 0, icon: null, color: 'red', binanceSymbol: 'avaxusdt' },
+  { id: 'polkadot', symbol: 'DOT', name: 'Polkadot', price: 0, change24h: 0, changePercent24h: 0, high24h: 0, low24h: 0, volume24h: 0, icon: null, color: 'pink', binanceSymbol: 'dotusdt' },
+  { id: 'chainlink', symbol: 'LINK', name: 'Chainlink', price: 0, change24h: 0, changePercent24h: 0, high24h: 0, low24h: 0, volume24h: 0, icon: null, color: 'blue', binanceSymbol: 'linkusdt' },
+  { id: 'polygon', symbol: 'MATIC', name: 'Polygon', price: 0, change24h: 0, changePercent24h: 0, high24h: 0, low24h: 0, volume24h: 0, icon: null, color: 'purple', binanceSymbol: 'maticusdt' },
+  { id: 'dogecoin', symbol: 'DOGE', name: 'Dogecoin', price: 0, change24h: 0, changePercent24h: 0, high24h: 0, low24h: 0, volume24h: 0, icon: null, color: 'yellow', binanceSymbol: 'dogeusdt' },
+  { id: 'shibainu', symbol: 'SHIB', name: 'Shiba Inu', price: 0, change24h: 0, changePercent24h: 0, high24h: 0, low24h: 0, volume24h: 0, icon: null, color: 'brown', binanceSymbol: 'shibusdt' },
 ];
 
-// Get icon
-const getIcon = (color: string) => {
+// Initialize icons
+ALL_ASSETS.forEach(asset => {
   const icons: { [key: string]: React.ReactNode } = {
     orange: <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/20"><Bitcoin className="w-5 h-5 text-white" /></div>,
     blue: <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20"><span className="text-white font-bold text-sm">Ξ</span></div>,
@@ -46,6 +48,21 @@ const getIcon = (color: string) => {
     red: <div className="w-8 h-8 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-lg shadow-red-500/20"><span className="text-white font-bold text-sm">A</span></div>,
     pink: <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-pink-600 flex items-center justify-center shadow-lg shadow-pink-500/20"><span className="text-white font-bold text-sm">D</span></div>,
     brown: <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-700 to-amber-800 flex items-center justify-center shadow-lg shadow-amber-700/20"><span className="text-white font-bold text-xs">S</span></div>,
+  };
+  asset.icon = icons[asset.color] || icons.gray;
+});
+
+// Get icon based on color
+const getIcon = (color: string) => {
+  const icons: { [key: string]: React.ReactNode } = {
+    orange: <div className="w-5 h-5 rounded-full bg-gradient-to-br from-orange-500 to-orange-600"><Bitcoin className="w-3 h-3 text-white m-1" /></div>,
+    blue: <div className="w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center"><span className="text-white text-[8px] font-bold">Ξ</span></div>,
+    purple: <div className="w-5 h-5 rounded-full bg-gradient-to-br from-purple-500 to-cyan-400 flex items-center justify-center"><span className="text-white text-[8px] font-bold">S</span></div>,
+    yellow: <div className="w-5 h-5 rounded-full bg-gradient-to-br from-yellow-500 to-yellow-600 flex items-center justify-center"><span className="text-white text-[8px] font-bold">$</span></div>,
+    gray: <div className="w-5 h-5 rounded-full bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center"><span className="text-white text-[8px] font-bold">X</span></div>,
+    red: <div className="w-5 h-5 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center"><span className="text-white text-[8px] font-bold">A</span></div>,
+    pink: <div className="w-5 h-5 rounded-full bg-gradient-to-br from-pink-500 to-pink-600 flex items-center justify-center"><span className="text-white text-[8px] font-bold">D</span></div>,
+    brown: <div className="w-5 h-5 rounded-full bg-gradient-to-br from-amber-700 to-amber-800 flex items-center justify-center"><span className="text-white text-[8px] font-bold">S</span></div>,
   };
   return icons[color] || icons.gray;
 };
@@ -64,119 +81,61 @@ const formatCurrency = (value: number, decimals = 2) => {
   });
 };
 
-// Animated number component
-const AnimatedNumber: React.FC<{ value: number; format: (v: number) => string }> = ({ value, format }) => {
-  const [displayValue, setDisplayValue] = useState(value);
-  const [isAnimating, setIsAnimating] = useState(false);
+// Mini sparkline for price movement
+const MiniSparkline: React.FC<{ price: number; prevPrice: number }> = ({ price, prevPrice }) => {
+  const isPositive = price >= prevPrice;
+  const color = isPositive ? '#22c55e' : '#ef4444';
+  
+  return (
+    <div className="flex items-center gap-1">
+      <div className={`w-0 h-0 border-l-[4px] border-l-transparent ${isPositive ? 'border-b-[8px] border-b-success' : 'border-t-[8px] border-t-danger'}`} />
+      <div className={`w-1.5 h-3 rounded-full ${isPositive ? 'bg-success' : 'bg-danger'}`} />
+      <div className={`w-1 h-2 rounded-full ${isPositive ? 'bg-success/70' : 'bg-danger/70'}`} />
+    </div>
+  );
+};
+
+// Real-time price display with flash effect
+const LivePrice: React.FC<{ price: number; prevPrice: number }> = ({ price, prevPrice }) => {
+  const [direction, setDirection] = useState<'up' | 'down' | null>(null);
 
   useEffect(() => {
-    if (value !== displayValue) {
-      setIsAnimating(true);
-      const diff = value - displayValue;
-      const step = diff / 10;
-      let current = displayValue;
-      
-      const timer = setInterval(() => {
-        current += step;
-        if ((step > 0 && current >= value) || (step < 0 && current <= value)) {
-          current = value;
-          setIsAnimating(false);
-        }
-        setDisplayValue(current);
-      }, 30);
-
-      return () => clearInterval(timer);
+    if (price !== prevPrice) {
+      setDirection(price > prevPrice ? 'up' : 'down');
+      const timer = setTimeout(() => setDirection(null), 500);
+      return () => clearTimeout(timer);
     }
-  }, [value, displayValue]);
+  }, [price, prevPrice]);
 
   return (
-    <span className={`transition-all duration-300 ${isAnimating ? 'scale-105' : ''}`}>
-      {format(displayValue)}
+    <span className={`text-2xl font-bold transition-all duration-300 ${
+      direction === 'up' ? 'text-success scale-105' : 
+      direction === 'down' ? 'text-danger scale-105' : 
+      'text-textPrimary'
+    }`}>
+      {formatCurrency(price, price < 1 ? 6 : 2)}
     </span>
   );
 };
 
-// Live sparkline chart
-const LiveSparkline: React.FC<{ data: number[]; isPositive: boolean; width?: number; height?: number }> = ({ 
-  data, 
-  isPositive,
-  width = 120, 
-  height = 50 
-}) => {
-  if (!data || data.length < 2) return null;
+// Asset card component
+const LiveAssetCard: React.FC<{ asset: MarketAsset; prevPrice: number }> = ({ asset, prevPrice }) => {
+  const isPositive = asset.changePercent24h >= 0;
 
-  const min = Math.min(...data);
-  const max = Math.max(...data);
-  const range = max - min || 1;
-
-  const points = data.map((value, index) => {
-    const x = (index / (data.length - 1)) * width;
-    const y = height - ((value - min) / range) * height;
-    return `${x},${y}`;
-  }).join(' ');
-
-  const gradientId = `gradient-${Math.random().toString(36).substr(2, 9)}`;
-  const color = isPositive ? '#22c55e' : '#ef4444';
-
-  return (
-    <svg width={width} height={height} className="overflow-visible">
-      <defs>
-        <linearGradient id={gradientId} x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor={color} stopOpacity="0.3" />
-          <stop offset="100%" stopColor={color} stopOpacity="0" />
-        </linearGradient>
-        <filter id={`glow-${gradientId}`}>
-          <feGaussianBlur stdDeviation="2" result="coloredBlur" />
-          <feMerge>
-            <feMergeNode in="coloredBlur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-      </defs>
-      
-      {/* Area fill */}
-      <path
-        d={`M 0,${height} L ${points} L ${width},${height} Z`}
-        fill={`url(#${gradientId})`}
-      />
-      
-      {/* Line */}
-      <path
-        d={`M ${points}`}
-        fill="none"
-        stroke={color}
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        filter={`url(#glow-${gradientId})`}
-        className="transition-all duration-500"
-      />
-      
-      {/* Live dot */}
-      <circle
-        cx={width}
-        cy={height - ((data[data.length - 1] - min) / range) * height}
-        r="4"
-        fill={color}
-        className="animate-pulse"
-      />
-    </svg>
-  );
-};
-
-// Asset card with live feel
-const LiveAssetCard: React.FC<{ asset: MarketAsset; sparklineData: number[] }> = ({ asset, sparklineData }) => {
-  const isPositive = asset.change24h >= 0;
-  
   return (
     <div className="group relative bg-gradient-to-br from-card/80 to-card/40 rounded-2xl p-5 border border-border/50 hover:border-info/30 transition-all duration-300 hover:shadow-xl hover:shadow-info/10 hover:-translate-y-1 overflow-hidden">
+      {/* Live indicator */}
+      <div className="absolute top-3 right-3 flex items-center gap-1">
+        <CircleDot className="w-2 h-2 text-success animate-pulse" />
+      </div>
+
       {/* Background glow */}
       <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
         isPositive ? 'bg-gradient-to-br from-success/5 to-transparent' : 'bg-gradient-to-br from-danger/5 to-transparent'
       }`} />
-      
+
       {/* Header */}
-      <div className="relative flex items-center justify-between mb-4">
+      <div className="relative flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
           {asset.icon}
           <div>
@@ -194,34 +153,29 @@ const LiveAssetCard: React.FC<{ asset: MarketAsset; sparklineData: number[] }> =
         
         {/* 24h Change Badge */}
         <div className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold ${
-          isPositive 
-            ? 'bg-success/10 text-success' 
-            : 'bg-danger/10 text-danger'
+          isPositive ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'
         }`}>
           {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-          {isPositive ? '+' : ''}{asset.change24h.toFixed(2)}%
+          {isPositive ? '+' : ''}{asset.changePercent24h.toFixed(2)}%
         </div>
       </div>
 
-      {/* Price */}
-      <div className="relative mb-4">
-        <span className={`text-2xl font-bold ${isPositive ? 'text-success' : 'text-danger'}`}>
-          <AnimatedNumber value={asset.price} format={(v) => formatCurrency(v, asset.price < 1 ? 6 : 2)} />
-        </span>
-        <div className="flex items-center gap-2 mt-1">
-          <span className="text-xs text-textMuted">MCap:</span>
-          <span className="text-xs text-textSecondary">{formatCurrency(asset.marketCap, 0)}</span>
-        </div>
+      {/* Live Price */}
+      <div className="relative mb-3">
+        <LivePrice price={asset.price} prevPrice={prevPrice} />
+        <MiniSparkline price={asset.price} prevPrice={prevPrice} />
       </div>
 
-      {/* Live Sparkline */}
-      <div className="relative h-14">
-        <LiveSparkline 
-          data={sparklineData} 
-          isPositive={isPositive}
-          width={140}
-          height={50}
-        />
+      {/* Stats */}
+      <div className="flex items-center justify-between text-xs">
+        <div className="flex flex-col">
+          <span className="text-textMuted">24h High</span>
+          <span className="text-textSecondary">{formatCurrency(asset.high24h)}</span>
+        </div>
+        <div className="flex flex-col items-end">
+          <span className="text-textMuted">24h Low</span>
+          <span className="text-textSecondary">{formatCurrency(asset.low24h)}</span>
+        </div>
       </div>
     </div>
   );
@@ -234,30 +188,28 @@ const MarketHeader: React.FC<{
   onSettings: () => void;
   refreshing: boolean;
   visibleCount: number;
-  error: string | null;
-}> = ({ lastUpdated, onRefresh, onSettings, refreshing, visibleCount, error }) => (
+  isConnected: boolean;
+}> = ({ lastUpdated, onRefresh, onSettings, refreshing, visibleCount, isConnected }) => (
   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
     <div className="flex items-center gap-3">
       <div className="relative">
         <div className="p-3 bg-gradient-to-br from-info/20 to-info/5 rounded-xl">
           <Activity className="w-6 h-6 text-info" />
         </div>
-        <div className="absolute -top-1 -right-1 flex items-center gap-1">
-          <CircleDot className="w-3 h-3 text-success animate-pulse" />
+        <div className={`absolute -top-1 -right-1 flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+          isConnected ? 'bg-success/20 text-success' : 'bg-danger/20 text-danger'
+        }`}>
+          {isConnected ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
+          {isConnected ? 'Live' : 'Offline'}
         </div>
       </div>
       <div>
         <div className="flex items-center gap-2">
           <h3 className="text-xl font-bold text-textPrimary">Live Market</h3>
-          {error && (
-            <span className="text-xs px-2 py-0.5 bg-warning/10 text-warning rounded-full border border-warning/20">
-              Demo
-            </span>
-          )}
         </div>
         <div className="flex items-center gap-2 text-sm text-textMuted">
           <Zap className="w-4 h-4 text-warning" />
-          <span>Powered by CoinGecko</span>
+          <span>Binance WebSocket</span>
           {lastUpdated && (
             <>
               <span className="text-border">•</span>
@@ -275,11 +227,10 @@ const MarketHeader: React.FC<{
       {/* Stats */}
       <div className="hidden sm:flex items-center gap-4 px-4 py-2 bg-bg/50 rounded-lg border border-border/50">
         <span className="text-sm text-textMuted">{visibleCount} assets</span>
-        {error && (
-          <span className="text-xs text-warning flex items-center gap-1">
-            Using cache
-          </span>
-        )}
+        <span className="text-xs text-success flex items-center gap-1">
+          <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+          Connected
+        </span>
       </div>
 
       {/* Settings */}
@@ -357,7 +308,7 @@ const AssetSettings: React.FC<{
           }`}>
             {visibleAssets.includes(asset.id) && <Check className="w-3 h-3 text-white" />}
           </div>
-          {getIcon(asset.color)}
+          {asset.icon}
           <div className="flex-1 text-left">
             <span className="font-semibold text-sm">{asset.symbol}</span>
             <span className="text-xs text-textMuted ml-2">{asset.name}</span>
@@ -372,9 +323,9 @@ const AssetSettings: React.FC<{
 const StatsFooter: React.FC<{ assets: MarketAsset[] }> = ({ assets }) => {
   if (assets.length < 2) return null;
 
-  const best = assets.reduce((a, b) => a.change24h > b.change24h ? a : b);
-  const worst = assets.reduce((a, b) => a.change24h < b.change24h ? a : b);
-  const avgChange = assets.reduce((sum, a) => sum + a.change24h, 0) / assets.length;
+  const best = assets.reduce((a, b) => a.changePercent24h > b.changePercent24h ? a : b);
+  const worst = assets.reduce((a, b) => a.changePercent24h < b.changePercent24h ? a : b);
+  const avgChange = assets.reduce((sum, a) => sum + a.changePercent24h, 0) / assets.length;
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-4 mt-6 pt-4 border-t border-border/50">
@@ -383,14 +334,14 @@ const StatsFooter: React.FC<{ assets: MarketAsset[] }> = ({ assets }) => {
           <TrendingUp className="w-4 h-4 text-success" />
           <span className="text-sm text-textMuted">Best:</span>
           <span className="text-sm font-semibold text-success">
-            {best.symbol} +{best.change24h.toFixed(2)}%
+            {best.symbol} +{best.changePercent24h.toFixed(2)}%
           </span>
         </div>
         <div className="flex items-center gap-2">
           <TrendingDown className="w-4 h-4 text-danger" />
           <span className="text-sm text-textMuted">Worst:</span>
           <span className="text-sm font-semibold text-danger">
-            {worst.symbol} {worst.change24h.toFixed(2)}%
+            {worst.symbol} {worst.changePercent24h.toFixed(2)}%
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -403,12 +354,12 @@ const StatsFooter: React.FC<{ assets: MarketAsset[] }> = ({ assets }) => {
       </div>
       
       <a
-        href="https://www.coingecko.com/"
+        href="https://www.binance.com/en/trade"
         target="_blank"
         rel="noopener noreferrer"
         className="flex items-center gap-1 text-sm text-textMuted hover:text-info transition-colors"
       >
-        View on CoinGecko
+        Trade on Binance
         <ExternalLink className="w-4 h-4" />
       </a>
     </div>
@@ -416,13 +367,14 @@ const StatsFooter: React.FC<{ assets: MarketAsset[] }> = ({ assets }) => {
 };
 
 const MarketOverview: React.FC = () => {
-  const [marketData, setMarketData] = useState<MarketAsset[]>([]);
-  const [historicalData, setHistoricalData] = useState<{ [key: string]: number[] }>({});
+  const [marketData, setMarketData] = useState<MarketAsset[]>(ALL_ASSETS.map(a => ({ ...a, prevPrice: 0 })));
+  const [prevPrices, setPrevPrices] = useState<{ [key: string]: number }>({});
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
+  const wsRef = useRef<WebSocket | null>(null);
   
   // Persist visible assets
   const [visibleAssets, setVisibleAssets] = useState<string[]>(() => {
@@ -445,84 +397,109 @@ const MarketOverview: React.FC = () => {
   const selectAll = () => setVisibleAssets(ALL_ASSETS.map(a => a.id));
   const deselectAll = () => setVisibleAssets([]);
 
-  // Fetch live data
-  const fetchMarketData = useCallback(async (isRefresh = false) => {
-    if (isRefresh) setRefreshing(true);
-    else setLoading(true);
-    setError(null);
-
+  // Fetch 24h ticker data via REST API
+  const fetch24hData = useCallback(async () => {
     try {
-      const visibleConfigs = ALL_ASSETS.filter(a => visibleAssets.includes(a.id));
-      const ids = visibleConfigs.length > 0 
-        ? visibleConfigs.map(a => a.id).join(',')
-        : 'bitcoin,ethereum,solana';
+      const symbols = visibleAssets.map(id => {
+        const asset = ALL_ASSETS.find(a => a.id === id);
+        return asset?.binanceSymbol;
+      }).filter(Boolean).join(',');
+
+      if (symbols.length === 0) return;
 
       const response = await fetch(
-        `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids}&order=market_cap_desc&per_page=20&page=1&sparkline=true&price_change_percentage_24h,7d`
+        `https://api.binance.com/api/v3/ticker/24hr?symbols=[${symbols.map((s: string) => `"${s.toUpperCase()}"`).join(',')}]`
       );
 
-      if (!response.ok) throw new Error(`API Error: ${response.status}`);
+      if (!response.ok) throw new Error('API Error');
 
       const data = await response.json();
 
-      const assets: MarketAsset[] = data.map((coin: any) => ({
-        id: coin.id,
-        name: coin.name,
-        symbol: coin.symbol.toUpperCase(),
-        price: coin.current_price,
-        change24h: coin.price_change_percentage_24h || 0,
-        marketCap: coin.market_cap,
-        volume24h: coin.total_volume,
-        icon: getIcon(ALL_ASSETS.find(a => a.id === coin.id)?.color || 'gray'),
-        category: 'crypto' as const,
-        isVisible: visibleAssets.includes(coin.id),
+      setMarketData(prev => prev.map(asset => {
+        const ticker = data.find((t: any) => t.symbol.toLowerCase() === asset.binanceSymbol);
+        if (ticker) {
+          return {
+            ...asset,
+            change24h: parseFloat(ticker.priceChange),
+            changePercent24h: parseFloat(ticker.priceChangePercent),
+            high24h: parseFloat(ticker.highPrice),
+            low24h: parseFloat(ticker.lowPrice),
+            volume24h: parseFloat(ticker.volume),
+          };
+        }
+        return asset;
       }));
 
-      const history: { [key: string]: number[] } = {};
-      data.forEach((coin: any) => {
-        history[coin.id] = coin.sparkline_in_7d?.price || [];
-      });
-
-      setMarketData(assets);
-      setHistoricalData(history);
       setLastUpdated(new Date());
     } catch (err) {
-      console.error('API Error:', err);
-      
-      // Fallback with realistic mock data
-      const mockAssets: MarketAsset[] = [
-        { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC', price: 67234, change24h: 2.34, marketCap: 1320000000000, volume24h: 28500000000, icon: getIcon('orange'), category: 'crypto', isVisible: visibleAssets.includes('bitcoin') },
-        { id: 'ethereum', name: 'Ethereum', symbol: 'ETH', price: 3489, change24h: -1.23, marketCap: 420000000000, volume24h: 15200000000, icon: getIcon('blue'), category: 'crypto', isVisible: visibleAssets.includes('ethereum') },
-        { id: 'solana', name: 'Solana', symbol: 'SOL', price: 178.45, change24h: 5.67, marketCap: 78000000000, volume24h: 4200000000, icon: getIcon('purple'), category: 'crypto', isVisible: visibleAssets.includes('solana') },
-        { id: 'binancecoin', name: 'BNB', symbol: 'BNB', price: 584.20, change24h: 0.89, marketCap: 87000000000, volume24h: 1800000000, icon: getIcon('yellow'), category: 'crypto', isVisible: visibleAssets.includes('binancecoin') },
-        { id: 'ripple', name: 'XRP', symbol: 'XRP', price: 0.5234, change24h: -2.45, marketCap: 29000000000, volume24h: 1200000000, icon: getIcon('gray'), category: 'crypto', isVisible: visibleAssets.includes('ripple') },
-        { id: 'cardano', name: 'Cardano', symbol: 'ADA', price: 0.4567, change24h: 3.21, marketCap: 16000000000, volume24h: 450000000, icon: getIcon('blue'), category: 'crypto', isVisible: visibleAssets.includes('cardano') },
-      ];
-      
-      const mockHistory: { [key: string]: number[] } = {};
-      mockAssets.forEach(asset => {
-        const basePrice = asset.price;
-        mockHistory[asset.id] = Array.from({ length: 168 }, (_, i) => {
-          const volatility = 0.02;
-          return basePrice * (1 + (Math.random() - 0.5) * volatility * (1 + i * 0.01));
-        });
-      });
-
-      setMarketData(mockAssets.filter(a => visibleAssets.includes(a.id) || visibleAssets.length === 0));
-      setHistoricalData(mockHistory);
-      setLastUpdated(new Date());
-      setError('Using cached data - API rate limited');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
+      console.error('Error fetching 24h data:', err);
     }
   }, [visibleAssets]);
 
+  // Connect to WebSocket for real-time prices
   useEffect(() => {
-    fetchMarketData();
-    const interval = setInterval(() => fetchMarketData(true), 60000);
-    return () => clearInterval(interval);
-  }, [fetchMarketData]);
+    const visibleSymbols = visibleAssets
+      .map(id => {
+        const asset = ALL_ASSETS.find(a => a.id === id);
+        return asset?.binanceSymbol;
+      })
+      .filter(Boolean);
+
+    if (visibleSymbols.length === 0) return;
+
+    // Connect to Binance WebSocket
+    const streams = visibleSymbols.map(s => `${s}@trade`).join('/');
+    const ws = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${streams}`);
+    wsRef.current = ws;
+
+    ws.onopen = () => {
+      console.log('WebSocket connected');
+      setIsConnected(true);
+      setLoading(false);
+      // Fetch 24h data on connection
+      fetch24hData();
+    };
+
+    ws.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      if (message.data && message.data.e === 'trade') {
+        const { s, p } = message.data; // symbol, price
+        const price = parseFloat(p);
+        const binanceSymbol = s.toLowerCase();
+
+        setMarketData(prev => prev.map(asset => {
+          if (asset.binanceSymbol === binanceSymbol) {
+            setPrevPrices(prevPrices => ({
+              ...prevPrices,
+              [asset.id]: prevPrices[asset.id] ?? asset.price
+            }));
+            return { ...asset, price };
+          }
+          return asset;
+        }));
+        setLastUpdated(new Date());
+      }
+    };
+
+    ws.onerror = (err) => {
+      console.error('WebSocket error:', err);
+      setIsConnected(false);
+    };
+
+    ws.onclose = () => {
+      console.log('WebSocket closed');
+      setIsConnected(false);
+    };
+
+    return () => {
+      ws.close();
+    };
+  }, [visibleAssets, fetch24hData]);
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetch24hData().finally(() => setRefreshing(false));
+  };
 
   const visibleMarketData = useMemo(() => {
     if (visibleAssets.length === 0) return marketData;
@@ -530,7 +507,7 @@ const MarketOverview: React.FC = () => {
   }, [marketData, visibleAssets]);
 
   // Loading skeleton
-  if (loading && marketData.length === 0) {
+  if (loading && marketData.every(a => a.price === 0)) {
     return (
       <div className="bg-gradient-to-br from-card to-card/50 border border-border rounded-2xl p-6">
         <div className="flex items-center gap-4 mb-6">
@@ -545,7 +522,7 @@ const MarketOverview: React.FC = () => {
             <div key={i} className="bg-bg/50 rounded-2xl p-5 animate-pulse">
               <div className="h-6 w-20 bg-border rounded mb-3" />
               <div className="h-8 w-32 bg-border rounded mb-4" />
-              <div className="h-12 bg-border rounded" />
+              <div className="h-4 bg-border rounded" />
             </div>
           ))}
         </div>
@@ -567,22 +544,14 @@ const MarketOverview: React.FC = () => {
       )}
 
       <div className="bg-gradient-to-br from-card/80 to-card/40 border border-border/50 backdrop-blur-sm rounded-2xl p-6 shadow-xl">
-        {/* Error Banner */}
-        {error && (
-          <div className="mb-4 p-3 bg-warning/10 border border-warning/20 rounded-xl flex items-center gap-2">
-            <Activity className="w-4 h-4 text-warning" />
-            <span className="text-sm text-warning">{error}</span>
-          </div>
-        )}
-
         {/* Header */}
         <MarketHeader
           lastUpdated={lastUpdated}
-          onRefresh={() => fetchMarketData(true)}
+          onRefresh={handleRefresh}
           onSettings={() => setShowSettings(!showSettings)}
           refreshing={refreshing}
           visibleCount={visibleAssets.length}
-          error={error}
+          isConnected={isConnected}
         />
 
         {/* Empty State */}
@@ -603,8 +572,8 @@ const MarketOverview: React.FC = () => {
               {visibleMarketData.map((asset) => (
                 <LiveAssetCard 
                   key={asset.id} 
-                  asset={asset} 
-                  sparklineData={historicalData[asset.id] || []} 
+                  asset={asset}
+                  prevPrice={prevPrices[asset.id] ?? asset.price}
                 />
               ))}
             </div>
