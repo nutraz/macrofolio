@@ -1,0 +1,19 @@
+# Common
+.DS_Store
+
+# Dependencies / build output
+**/node_modules/
+**/dist/
+**/build/
+**/.vite/
+
+# Env files
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Mobile
+**/android/local.properties
+**/*.keystore
+**/*.jks
+
