@@ -37,7 +37,10 @@ describe('Macrofolio Audit Readiness Verification', () => {
     const verificationTests = countTestsInFile(__dirname + '/verification.test.ts');
     
     // Smart contract tests (from root test directory)
-    const rootTestPath = require('path').join(__dirname, '../../../../test/PortfolioAnchor.test.ts');
+    const rootTestPath = require('path').join(
+      __dirname,
+      '../../../chain/test/PortfolioAnchor.test.ts',
+    );
     const contractTests = countTestsInFile(rootTestPath);
     
     const totalTests = securityTests + walletTests + verificationTests + contractTests;

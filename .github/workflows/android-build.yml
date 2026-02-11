@@ -1,4 +1,4 @@
-name: Android CI/CD
+name: Android CI
 
 on:
   push:
@@ -8,83 +8,66 @@ on:
   workflow_dispatch:  # Allow manual triggers
 
 jobs:
-  build-android:
+  build-android-debug:
     runs-on: ubuntu-latest
     
     steps:
     - name: Checkout code
-      uses: actions/checkout @v3
+      uses: actions/checkout@v4
       with:
         submodules: recursive
     
     - name: Setup Java 17
-      uses: actions/setup-java @v3
+      uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
     
     - name: Setup Node.js
-      uses: actions/setup-node @v3
+      uses: actions/setup-node@v4
       with:
         node-version: '22'
         cache: 'npm'
-        cache-dependency-path: 'macrofolio/src/macrofolio_assets/package-lock.json'
+        cache-dependency-path: 'macrofinal/mobile/package-lock.json'
     
     - name: Install dependencies
-      working-directory: ./macrofolio/src/macrofolio_assets
-      run: |
-        npm ci --legacy-peer-deps
-        npm install -g @capacitor/cli
-    
-    - name: Build web assets
-      working-directory: ./macrofolio/src/macrofolio_assets
-      run: npm run build
+      working-directory: ./macrofinal/mobile
+      run: npm ci
     
     - name: Setup Android SDK
-      uses: android-actions/setup-android @v2
+      uses: android-actions/setup-android@v3
     
-    - name: Add Android platform
-      working-directory: ./macrofolio/src/macrofolio_assets
+    - name: Configure SDK path for Gradle
+      working-directory: ./macrofinal/mobile/android
       run: |
-        npx cap add android
-        npx cap sync android
+        echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
     
+    - name: Create debug keystore (if missing)
+      working-directory: ./macrofinal/mobile/android/app
+      run: |
+        if [ ! -f debug.keystore ]; then
+          keytool -genkeypair \
+            -alias androiddebugkey \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -storetype JKS \
+            -keystore debug.keystore \
+            -storepass android \
+            -keypass android \
+            -dname "CN=Android Debug, O=Android, C=US" \
+            -noprompt
+        fi
+
     - name: Build Android Debug APK
-      working-directory: ./macrofolio/src/macrofolio_assets/android
+      working-directory: ./macrofinal/mobile/android
       run: |
         chmod +x gradlew
         ./gradlew assembleDebug --stacktrace
     
     - name: Upload APK artifact
-      uses: actions/upload-artifact @v3
+      uses: actions/upload-artifact@v4
       with:
-        name: macrofolio-android-apk
-        path: src/macrofolio_assets/android/app/build/outputs/apk/debug/app-debug.apk
-        retention-days: 7
-    
-    - name: Build Android Release APK
-      if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-      working-directory: ./macrofolio/src/macrofolio_assets/android
-      run: |
-        # Create a simple keystore for signing (for testing only)
-        keytool -genkeypair \
-          -alias macrofolio \
-          -keyalg RSA \
-          -keysize 2048 \
-          -validity 10000 \
-          -storetype PKCS12 \
-          -keystore macrofolio.keystore \
-          -storepass "macrofolio123" \
-          -keypass "macrofolio123" \
-          -dname "CN=Macrofolio, OU=Development, O=Macrofolio, L=SanFrancisco, S=California, C=US" \
-          -noprompt
-        
-        ./gradlew assembleRelease
-        
-    - name: Upload Release APK
-      if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-      uses: actions/upload-artifact @v3
-      with:
-        name: macrofolio-android-release
-        path: src/macrofolio_assets/android/app/build/outputs/apk/release/app-release-unsigned.apk
+        name: mobile-android-debug-apk
+        path: macrofinal/mobile/android/app/build/outputs/apk/debug/app-debug.apk
         retention-days: 7

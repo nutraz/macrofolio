@@ -15,7 +15,23 @@ import { useWallet } from './hooks/useWallet';
 import { PortfolioProvider } from './context/PortfolioContext';
 
 import { Activity, Database, Zap, ExternalLink, ShieldAlert } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import DemoAuth from './src/services/auth';
+import { initRevenueCat, checkPremiumStatus } from './src/services/revenuecat';
 
+// Inside your App component, add:
+useEffect(() => {
+  // Auto-login demo user
+  DemoAuth.signIn();
+  
+  // Initialize RevenueCat
+  initRevenueCat().then(() => {
+    checkPremiumStatus().then(isPremium => {
+      // Set premium state in your component
+      // You'll need to add setIsPremium to your component state
+    });
+  });
+}, []);
 // Demo data
 const DEMO_ASSET_TYPES = [
   "Stocks / ETFs",

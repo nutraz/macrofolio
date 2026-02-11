@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Wallet, Settings, Bell, Search, Menu, X, Zap, CheckCircle, Crown, Globe, Fingerprint } from 'lucide-react';
+import { Wallet, Settings, Bell, Search, Menu, X, Zap, CheckCircle, Crown, Globe, Fingerprint, QrCode } from 'lucide-react';
+import ShareQrModal from './ShareQrModal';
 
 interface HeaderProps {
   currentView: string;
@@ -22,7 +23,9 @@ const Header: React.FC<HeaderProps> = ({
   ModeSwitcher,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [qrOpen, setQrOpen] = React.useState(false);
   const navigate = useNavigate();
+  const shareUrl = typeof window !== 'undefined' ? window.location.href : 'https://macrofolio.vercel.app/';
   
   const navigationItems = [
     { id: 'dashboard', label: 'Dashboard' },
@@ -145,6 +148,15 @@ const Header: React.FC<HeaderProps> = ({
                 <span className="absolute top-1 right-1 w-2 h-2 bg-success rounded-full animate-pulse" aria-hidden="true"></span>
               </button>
 
+              {/* Share QR */}
+              <button
+                className="p-2 rounded-lg hover:bg-card/50 text-textMuted hover:text-textPrimary transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-success/50"
+                aria-label="Share (QR code)"
+                onClick={() => setQrOpen(true)}
+              >
+                <QrCode className="w-5 h-5" />
+              </button>
+
               {/* Settings */}
               <button 
                 className="p-2 rounded-lg hover:bg-card/50 text-textMuted hover:text-textPrimary transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-success/50"
@@ -251,6 +263,8 @@ const Header: React.FC<HeaderProps> = ({
           </nav>
         )}
       </div>
+
+      <ShareQrModal open={qrOpen} onClose={() => setQrOpen(false)} url={shareUrl} />
     </header>
   );
 };

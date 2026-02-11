@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -6,28 +6,52 @@ import {
   ScrollView,
   TouchableOpacity,
   FlatList,
+  Alert,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-const mockAssets = [
-  { id: '1', name: 'Apple Stock', symbol: 'AAPL', type: 'Stock', amount: 10, price: 185.2, change: 0.8 },
-  { id: '2', name: 'Bitcoin', symbol: 'BTC', type: 'Crypto', amount: 0.5, price: 34505.5, change: 2.5 },
-  { id: '3', name: 'Gold ETF', symbol: 'GLD', type: 'Commodity', amount: 15, price: 189.45, change: 0.3 },
-];
+import { useAssets } from '../context/AssetsContext';
+import MarketTicker from '../components/MarketTicker';
+import type { Asset, AssetType } from '../types';
 
-export default function PortfolioScreen() {
-  const [assets] = useState(mockAssets);
+type Props = {
+  navigation: any;
+};
 
-  const totalValue = assets.reduce((sum, asset) => sum + (asset.amount * asset.price), 0);
-  const totalChange = assets.reduce(
-    (sum, asset) => sum + (asset.change * (asset.amount * asset.price) / 100),
-    0,
-  );
+export default function PortfolioScreen({ navigation }: Props) {
+  const { assets, loading, deleteAsset } = useAssets();
 
-  const renderAssetItem = ({ item }: { item: (typeof mockAssets)[number] }) => (
+  const { totalValue, totalDollarChange } = useMemo(() => {
+    const tv = assets.reduce((sum, asset) => sum + asset.amount * asset.price, 0);
+    const td = assets.reduce(
+      (sum, asset) => sum + (asset.changePct * (asset.amount * asset.price)) / 100,
+      0,
+    );
+    return { totalValue: tv, totalDollarChange: td };
+  }, [assets]);
+
+  const onDelete = (asset: Asset) => {
+    Alert.alert('Delete Asset', `Remove ${asset.symbol}?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          await deleteAsset(asset.id);
+        },
+      },
+    ]);
+  };
+
+  const renderAssetItem = ({ item }: { item: Asset }) => (
     <View style={styles.assetCard}>
       <View style={styles.assetHeader}>
-        <View style={[styles.assetIcon, { backgroundColor: getAssetColor(item.type) }]}>
+        <View
+          style={[
+            styles.assetIcon,
+            { backgroundColor: getAssetColor(item.type) },
+          ]}
+        >
           <Ionicons
             name={getAssetIconName(item.type)}
             size={24}
@@ -36,31 +60,59 @@ export default function PortfolioScreen() {
         </View>
         <View style={styles.assetInfo}>
           <Text style={styles.assetName}>{item.name}</Text>
-          <Text style={styles.assetSymbol}>{item.symbol} - {item.type}</Text>
+          <Text style={styles.assetSymbol}>
+            {item.symbol} - {item.type}
+            {item.category ? ` • ${item.category}` : ''}
+          </Text>
         </View>
         <View style={styles.assetValue}>
           <Text style={styles.assetPrice}>${(item.amount * item.price).toFixed(2)}</Text>
-          <Text style={[styles.assetChange, { color: item.change >= 0 ? '#10b981' : '#ef4444' }]}>
-            {item.change >= 0 ? '+' : ''}{item.change}%
+          <Text
+            style={[
+              styles.assetChange,
+              { color: item.changePct >= 0 ? '#10b981' : '#ef4444' },
+            ]}
+          >
+            {item.changePct >= 0 ? '+' : ''}{item.changePct}%
           </Text>
         </View>
+        <TouchableOpacity
+          accessibilityLabel={`Edit ${item.symbol}`}
+          style={styles.iconButton}
+          onPress={() => navigation.navigate('Add', { assetId: item.id })}
+        >
+          <Ionicons name="create-outline" size={18} color="#94a3b8" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          accessibilityLabel={`Delete ${item.symbol}`}
+          style={styles.iconButton}
+          onPress={() => onDelete(item)}
+        >
+          <Ionicons name="trash-outline" size={18} color="#ef4444" />
+        </TouchableOpacity>
       </View>
     </View>
   );
 
   return (
     <ScrollView style={styles.container}>
+      <MarketTicker />
       <View style={styles.summaryCard}>
         <Text style={styles.summaryLabel}>Total Portfolio Value</Text>
         <Text style={styles.summaryValue}>${totalValue.toFixed(2)}</Text>
         <View style={styles.changeRow}>
-          <Text style={[styles.changeText, { color: totalChange >= 0 ? '#10b981' : '#ef4444' }]}>
-            {totalChange >= 0 ? '+' : ''}${Math.abs(totalChange).toFixed(2)} today
+          <Text
+            style={[
+              styles.changeText,
+              { color: totalDollarChange >= 0 ? '#10b981' : '#ef4444' },
+            ]}
+          >
+            {totalDollarChange >= 0 ? '+' : ''}${Math.abs(totalDollarChange).toFixed(2)} today
           </Text>
           <Ionicons
-            name={totalChange >= 0 ? 'trending-up' : 'trending-down'}
+            name={totalDollarChange >= 0 ? 'trending-up' : 'trending-down'}
             size={20}
-            color={totalChange >= 0 ? '#10b981' : '#ef4444'}
+            color={totalDollarChange >= 0 ? '#10b981' : '#ef4444'}
           />
         </View>
       </View>
@@ -78,7 +130,7 @@ export default function PortfolioScreen() {
         </View>
         <View style={styles.statCard}>
           <Text style={[styles.statValue, { color: '#10b981' }]}>
-            {assets.filter((a) => a.change > 0).length}
+            {assets.filter((a) => a.changePct > 0).length}
           </Text>
           <Text style={styles.statLabel}>Gaining</Text>
         </View>
@@ -86,10 +138,18 @@ export default function PortfolioScreen() {
 
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Your Assets</Text>
-        <TouchableOpacity>
-          <Text style={styles.seeAllText}>See All -></Text>
+        <TouchableOpacity onPress={() => navigation.navigate('Add')}>
+          <Text style={styles.seeAllText}>Add -{'>'}</Text>
         </TouchableOpacity>
       </View>
+
+      {loading ? (
+        <Text style={styles.emptyText}>Loading...</Text>
+      ) : assets.length === 0 ? (
+        <Text style={styles.emptyText}>
+          No assets yet. Tap “Add” to create your first holding.
+        </Text>
+      ) : null}
 
       <FlatList
         data={assets}
@@ -101,7 +161,7 @@ export default function PortfolioScreen() {
   );
 }
 
-const getAssetIconName = (type: string) => {
+const getAssetIconName = (type: AssetType) => {
   switch (type) {
     case 'Stock':
       return 'trending-up';
@@ -116,7 +176,7 @@ const getAssetIconName = (type: string) => {
   }
 };
 
-const getAssetColor = (type: string) => {
+const getAssetColor = (type: AssetType) => {
   switch (type) {
     case 'Stock':
       return '#3b82f6';
@@ -234,6 +294,7 @@ const styles = StyleSheet.create({
   },
   assetValue: {
     alignItems: 'flex-end',
+    marginRight: 8,
   },
   assetPrice: {
     color: '#ffffff',
@@ -243,5 +304,14 @@ const styles = StyleSheet.create({
   assetChange: {
     fontSize: 14,
     fontWeight: '500',
+  },
+  iconButton: {
+    paddingHorizontal: 6,
+    paddingVertical: 6,
+  },
+  emptyText: {
+    color: '#94a3b8',
+    fontSize: 14,
+    paddingVertical: 12,
   },
 });
