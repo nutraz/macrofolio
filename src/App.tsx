@@ -15,37 +15,9 @@ import { useWallet } from './hooks/useWallet';
 import { PortfolioProvider } from './context/PortfolioContext';
 
 import { Activity, Database, Zap, ExternalLink, ShieldAlert } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import DemoAuth from './src/services/auth';
-import { initRevenueCat, checkPremiumStatus } from './src/services/revenuecat';
 
-// Inside your App component, add:
-useEffect(() => {
-  // Auto-login demo user
-  DemoAuth.signIn();
-  
-  // Initialize RevenueCat
-  initRevenueCat().then(() => {
-    checkPremiumStatus().then(isPremium => {
-      // Set premium state in your component
-      // You'll need to add setIsPremium to your component state
-    });
-  });
-}, []);
 // Demo data
-const DEMO_ASSET_TYPES = [
-  "Stocks / ETFs",
-  "Crypto Assets", 
-  "Gold & Silver",
-  "Real Estate",
-  "Fixed Income",
-  "NFTs"
-];
-
-// =============================================================================
-// SECURITY: Demo Mode Guard Component
-// Prevents confusion between demo and production modes
-// =============================================================================
+const DEMO_ASSET_TYPES = ['Stocks / ETFs', 'Crypto Assets', 'Gold & Silver', 'Real Estate', 'Fixed Income', 'NFTs'];
 
 interface DemoModeGuardProps {
   isDemoMode: boolean;
@@ -54,33 +26,23 @@ interface DemoModeGuardProps {
 
 const DemoModeGuard: React.FC<DemoModeGuardProps> = ({ isDemoMode, children }) => {
   if (!isDemoMode) return <>{children}</>;
-  
+
   return (
     <div className="relative">
-      {/* Watermark overlay */}
       <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center opacity-10">
-        <div className="text-9xl font-bold text-warning rotate-[-45deg]">
-          DEMO MODE
-        </div>
+        <div className="text-9xl font-bold text-warning rotate-[-45deg]">DEMO MODE</div>
       </div>
-      
-      {/* Persistent banner */}
+
       <div className="sticky top-0 z-40 bg-warning/90 text-warning-foreground px-4 py-2 text-center font-medium">
         <ShieldAlert className="inline w-4 h-4 mr-2" />
-        ⚠️ DEMO MODE ACTIVE - No real blockchain transactions will occur. 
-        Data is simulated for demonstration purposes only.
+        ⚠️ DEMO MODE ACTIVE - No real blockchain transactions will occur. Data is simulated for demonstration purposes
+        only.
       </div>
-      
+
       {children}
     </div>
   );
 };
-
-
-
-// =============================================================================
-// Mode Switching Confirmation Dialog
-// =============================================================================
 
 interface ModeSwitcherProps {
   isDemoMode: boolean;
@@ -89,7 +51,7 @@ interface ModeSwitcherProps {
 
 const ModeSwitcher: React.FC<ModeSwitcherProps> = ({ isDemoMode, onToggle }) => {
   const [showConfirm, setShowConfirm] = useState(false);
-  
+
   const handleToggle = () => {
     if (!showConfirm) {
       setShowConfirm(true);
@@ -98,31 +60,25 @@ const ModeSwitcher: React.FC<ModeSwitcherProps> = ({ isDemoMode, onToggle }) => 
     onToggle();
     setShowConfirm(false);
   };
-  
+
   return (
     <>
       <button
         onClick={handleToggle}
         className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-          isDemoMode 
-            ? 'bg-warning/20 text-warning hover:bg-warning/30' 
-            : 'bg-success/20 text-success hover:bg-success/30'
+          isDemoMode ? 'bg-warning/20 text-warning hover:bg-warning/30' : 'bg-success/20 text-success hover:bg-success/30'
         }`}
       >
         <Zap className="w-4 h-4" />
         {isDemoMode ? 'Demo' : 'Live'}
       </button>
-      
+
       {showConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="bg-card border border-border rounded-xl p-6 max-w-md mx-4 shadow-xl">
             <div className="flex items-center gap-3 mb-4">
               <div className={`p-3 rounded-full ${isDemoMode ? 'bg-success/20' : 'bg-warning/20'}`}>
-                {isDemoMode ? (
-                  <Zap className="w-6 h-6 text-success" />
-                ) : (
-                  <ShieldAlert className="w-6 h-6 text-warning" />
-                )}
+                {isDemoMode ? <Zap className="w-6 h-6 text-success" /> : <ShieldAlert className="w-6 h-6 text-warning" />}
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-textPrimary">
@@ -130,14 +86,13 @@ const ModeSwitcher: React.FC<ModeSwitcherProps> = ({ isDemoMode, onToggle }) => 
                 </h3>
               </div>
             </div>
-            
+
             <p className="text-textSecondary mb-4">
-              {isDemoMode 
+              {isDemoMode
                 ? 'You are about to switch to live mode. This will connect to the blockchain and all transactions will be real. You will need a wallet connected to Polygon Amoy or Base Sepolia testnet.'
-                : 'You are about to switch to demo mode. No real blockchain transactions will occur. All data will be simulated for demonstration purposes.'
-              }
+                : 'You are about to switch to demo mode. No real blockchain transactions will occur. All data will be simulated for demonstration purposes.'}
             </p>
-            
+
             {isDemoMode && (
               <div className="bg-danger/10 border border-danger/20 rounded-lg p-3 mb-4">
                 <p className="text-sm text-danger">
@@ -145,19 +100,19 @@ const ModeSwitcher: React.FC<ModeSwitcherProps> = ({ isDemoMode, onToggle }) => 
                 </p>
               </div>
             )}
-            
+
             <div className="flex gap-3">
-              <button 
+              <button
                 onClick={() => setShowConfirm(false)}
                 className="flex-1 px-4 py-2 bg-card border border-border rounded-lg hover:bg-card/80 transition-colors"
               >
                 Cancel
               </button>
-              <button 
+              <button
                 onClick={handleToggle}
                 className={`flex-1 px-4 py-2 rounded-lg transition-colors ${
-                  isDemoMode 
-                    ? 'bg-success text-success-foreground hover:bg-success/90' 
+                  isDemoMode
+                    ? 'bg-success text-success-foreground hover:bg-success/90'
                     : 'bg-warning text-warning-foreground hover:bg-warning/90'
                 }`}
               >
@@ -171,11 +126,6 @@ const ModeSwitcher: React.FC<ModeSwitcherProps> = ({ isDemoMode, onToggle }) => 
   );
 };
 
-// =============================================================================
-// Wallet Provider Component
-// Wraps wallet logic and handles toast context properly
-// =============================================================================
-
 interface WalletData {
   isConnected: boolean;
   address: string | null;
@@ -183,19 +133,18 @@ interface WalletData {
   connect: () => Promise<unknown>;
   isMetaMaskInstalled: boolean;
   loading: boolean;
-};
+}
 
 const WalletProviderContent: React.FC<{
   onWalletData: (walletData: WalletData) => React.ReactNode;
 }> = ({ onWalletData }) => {
-  // MetaMask/Web3 wallet hook - must be used inside ToastProvider
   const {
     isConnected: walletConnected,
     address: walletAddress,
     networkName,
     connect: connectWallet,
     isMetaMaskInstalled,
-    loading: walletLoading
+    loading: walletLoading,
   } = useWallet();
 
   return onWalletData({
@@ -204,136 +153,78 @@ const WalletProviderContent: React.FC<{
     networkName,
     connect: connectWallet,
     isMetaMaskInstalled,
-    loading: walletLoading
+    loading: walletLoading,
   });
 };
-
-// =============================================================================
-// Main App Content Component
-// Receives wallet data and renders the full app UI
-// =============================================================================
 
 const AppContent: React.FC<{
   walletData: WalletData;
 }> = ({ walletData }) => {
   const { user, loading: authLoading } = useAuth();
+  const {
+    isConnected: walletConnected,
+    address: walletAddress,
+    networkName,
+    connect: connectWallet,
+    isMetaMaskInstalled,
+    loading: walletLoading,
+  } = walletData;
 
-  const { isConnected: walletConnected, address: walletAddress, networkName, connect: connectWallet, isMetaMaskInstalled, loading: walletLoading } = walletData;
-
-  // Demo mode detection from environment variable
-  // Defaults to true for demo mode if not explicitly set
-  // But we still need to show landing page first!
   const [isDemoMode, setIsDemoMode] = useState(() => {
     const demoMode = import.meta.env.VITE_DEMO_MODE;
-    // Only disable demo mode if explicitly set to "false"
     return demoMode !== 'false';
   });
-  const [currentView, setCurrentView] = useState<'dashboard' | 'portfolio' | 'analytics' | 'alerts' | 'verify' | 'premium'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'portfolio' | 'analytics' | 'alerts' | 'verify' | 'premium'>(
+    'dashboard',
+  );
   const [demoLoading, setDemoLoading] = useState(true);
-  const [hasEnteredDemo, setHasEnteredDemo] = useState(false);
-
-  // Check if this is a shareable/landing page link
   const [isLandingPage, setIsLandingPage] = useState(false);
-  
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    // Check for shareable link parameters
     const shareParams = ['ref', 'share', 'invite', 'referral', 'landing'];
-    const hasShareParam = shareParams.some(param => params.has(param));
-    if (hasShareParam) {
-      setIsLandingPage(true);
-    }
+    if (shareParams.some((param) => params.has(param))) setIsLandingPage(true);
   }, []);
 
-  // Demo mode loading effect
   useEffect(() => {
-    if (isDemoMode && !hasEnteredDemo) {
-      setDemoLoading(false); // Don't show loading, show splash
-    } else if (isDemoMode && hasEnteredDemo) {
-      setTimeout(() => {
-        setDemoLoading(false);
-      }, 1500);
-    } else {
-      setDemoLoading(false);
+    if (isDemoMode && !user) {
+      const t = setTimeout(() => setDemoLoading(false), 1500);
+      return () => clearTimeout(t);
     }
-  }, [isDemoMode, hasEnteredDemo]);
+    setDemoLoading(false);
+  }, [isDemoMode, user]);
 
-  // Handle demo entry from Splash
-  const handleEnterDemo = () => {
-    setHasEnteredDemo(true);
-    // Store in sessionStorage so refresh maintains demo mode
-    sessionStorage.setItem('isDemoMode', 'true');
-    sessionStorage.setItem('hasEnteredDemo', 'true');
-  };
+  const isConnected = isLandingPage ? false : isDemoMode || walletConnected || !!user;
 
-  // Load saved demo state on mount
-  useEffect(() => {
-    const savedDemo = sessionStorage.getItem('hasEnteredDemo');
-    if (savedDemo === 'true') {
-      setHasEnteredDemo(true);
-    }
-  }, []);
-
-  // Determine authentication method and connection state
-  const getAuthMethod = (): 'metamask' | 'supabase' | null => {
-    if (walletConnected) return 'metamask';
-    if (user) return 'supabase';
-    return null;
-  };
-
-  const authMethod = getAuthMethod();
-  // Show landing page for shareable links, otherwise use normal connection logic
-  // Only show dashboard if user has explicitly entered demo mode OR connected wallet
-  const isConnected = isLandingPage ? false : (hasEnteredDemo || walletConnected || !!user);
-
-  // Display address based on auth method
   const displayAddress = isDemoMode
     ? 'demo-user'
     : walletAddress
       ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
       : null;
 
-  // Network display
-  const displayNetwork = isDemoMode
-    ? 'Demo Mode'
-    : networkName || 'Unknown';
+  const displayNetwork = isDemoMode ? 'Demo Mode' : networkName || 'Unknown';
+  const dataSource = isDemoMode ? 'Demo Mode' : walletConnected ? 'Supabase + Web3' : 'Supabase';
 
-  // Data source label
-  const dataSource = isDemoMode
-    ? 'Demo Mode'
-    : walletConnected
-      ? 'Supabase + Web3'
-      : 'Supabase';
-
-  // Handle MetaMask connection
   const handleConnectMetaMask = async () => {
-    if (isDemoMode) {
-      // Demo mode - no wallet needed
-      return;
-    }
-
-    if (!walletConnected && isMetaMaskInstalled) {
-      await connectWallet();
-    }
+    if (isDemoMode) return;
+    if (!walletConnected && isMetaMaskInstalled) await connectWallet();
   };
 
-  const toggleDemoMode = () => {
-    setIsDemoMode(!isDemoMode);
-  };
+  const toggleDemoMode = () => setIsDemoMode(!isDemoMode);
 
   const renderContent = () => {
     if (!isConnected) {
-      return <Splash
-        onConnectMetaMask={handleConnectMetaMask}
-        isDemoMode={isDemoMode}
-        onToggleDemoMode={toggleDemoMode}
-        isMetaMaskInstalled={isMetaMaskInstalled}
-        walletLoading={walletLoading}
-        onEnterDemo={handleEnterDemo}
-      />;
+      return (
+        <Splash
+          onConnectMetaMask={handleConnectMetaMask}
+          isDemoMode={isDemoMode}
+          onToggleDemoMode={toggleDemoMode}
+          isMetaMaskInstalled={isMetaMaskInstalled}
+          walletLoading={walletLoading}
+        />
+      );
     }
 
-    // Use demo loading for demo mode initial load
     const loading = isDemoMode ? demoLoading : authLoading;
 
     switch (currentView) {
@@ -349,13 +240,7 @@ const AppContent: React.FC<{
         return <Premium />;
       case 'dashboard':
       default:
-        return (
-          <Dashboard
-            assetTypes={DEMO_ASSET_TYPES}
-            loading={loading}
-            isDemoMode={isDemoMode}
-          />
-        );
+        return <Dashboard assetTypes={DEMO_ASSET_TYPES} loading={loading} isDemoMode={isDemoMode} />;
     }
   };
 
@@ -372,18 +257,15 @@ const AppContent: React.FC<{
           ModeSwitcher={() => <ModeSwitcher isDemoMode={isDemoMode} onToggle={toggleDemoMode} />}
         />
 
-        <main className="container mx-auto px-4 py-8">
-          {renderContent()}
-        </main>
+        <main className="container mx-auto px-4 py-8">{renderContent()}</main>
 
-        {/* System Status Footer - Glassmorphism */}
         <div className="fixed bottom-4 right-4 backdrop-blur-xl bg-card/80 border border-border rounded-xl p-4 shadow-card-glow w-64">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center space-x-2">
               <Activity className="w-4 h-4 text-success" />
               <p className="text-sm font-medium text-textPrimary">System Status</p>
             </div>
-            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-success animate-pulse' : 'bg-danger'}`}></div>
+            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-success animate-pulse' : 'bg-danger'}`} />
           </div>
 
           <div className="space-y-2">
@@ -398,9 +280,7 @@ const AppContent: React.FC<{
               <span className="text-textMuted flex items-center gap-1">
                 <Database className="w-3 h-3" /> Data Source
               </span>
-              <span className={`font-medium ${isDemoMode ? 'text-warning' : 'text-info'}`}>
-                {dataSource}
-              </span>
+              <span className={`font-medium ${isDemoMode ? 'text-warning' : 'text-info'}`}>{dataSource}</span>
             </div>
 
             <div className="flex items-center justify-between text-xs">
@@ -422,10 +302,6 @@ const AppContent: React.FC<{
     </DemoModeGuard>
   );
 };
-
-// =============================================================================
-// Main App Component
-// =============================================================================
 
 function App() {
   return (
