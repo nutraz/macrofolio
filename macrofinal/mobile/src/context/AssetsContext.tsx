@@ -32,16 +32,80 @@ function generateId() {
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
+// Mock assets for development/demo
+const MOCK_ASSETS: Asset[] = [
+  {
+    id: 'mock-aapl',
+    name: 'Apple Inc.',
+    symbol: 'AAPL',
+    type: 'Stock',
+    category: 'Technology',
+    amount: 10,
+    price: 175.34,
+    changePct: 1.25,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 'mock-btc',
+    name: 'Bitcoin',
+    symbol: 'BTC',
+    type: 'Crypto',
+    category: 'Cryptocurrency',
+    amount: 0.5,
+    price: 51234.56,
+    changePct: -0.75,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 'mock-eth',
+    name: 'Ethereum',
+    symbol: 'ETH',
+    type: 'Crypto',
+    category: 'Cryptocurrency',
+    amount: 2.5,
+    price: 3456.78,
+    changePct: 2.15,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 'mock-tsla',
+    name: 'Tesla Inc.',
+    symbol: 'TSLA',
+    type: 'Stock',
+    category: 'Automotive',
+    amount: 5,
+    price: 245.67,
+    changePct: -1.50,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+];
+
 export function AssetsProvider({ children }: { children: React.ReactNode }) {
+  // Start with empty array - mock assets will be loaded after mount
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let mounted = true;
     (async () => {
+      // Try to load from storage first
       const loaded = await loadAssets();
+      
       if (!mounted) return;
-      setAssets(loaded);
+      
+      // If no assets in storage, use mock data for demo
+      if (loaded.length === 0) {
+        setAssets(MOCK_ASSETS);
+        // Save mock data to storage for persistence
+        await saveAssets(MOCK_ASSETS);
+      } else {
+        setAssets(loaded);
+      }
+      
       setLoading(false);
     })();
     return () => {

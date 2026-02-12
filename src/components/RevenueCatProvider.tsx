@@ -93,7 +93,9 @@ const DemoRevenueCatProvider: React.FC<DemoRevenueCatProviderProps> = ({ childre
 
   const purchaseProduct = useCallback(async (productId: string): Promise<boolean> => {
     try {
-      console.log('[Demo] Simulating purchase of:', productId);
+      if (import.meta.env.DEV) {
+        console.log('[Demo] Simulating purchase of:', productId);
+      }
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       const userId = localStorage.getItem('macrofolio_user_id') || 'demo_user_' + Math.random().toString(36).substr(2, 9);
@@ -185,7 +187,9 @@ const RealRevenueCatProvider: React.FC<RealRevenueCatProviderProps> = ({ childre
     try {
       const userId = localStorage.getItem('macrofolio_user_id');
       if (!userId) {
-        console.log('No user ID found, using demo data');
+        if (import.meta.env.DEV) {
+          console.log('No user ID found, using demo data');
+        }
         const info = RevenueCatService.getDemoCustomerInfo('new_user');
         setCustomerInfo(info);
         return;
@@ -223,7 +227,9 @@ const RealRevenueCatProvider: React.FC<RealRevenueCatProviderProps> = ({ childre
       }
 
       const purchaseLink = RevenueCatService.getPurchaseLink(productId, userId);
-      console.log('Redirecting to purchase:', purchaseLink);
+      if (import.meta.env.DEV) {
+        console.log('Redirecting to purchase:', purchaseLink);
+      }
       
       if (RevenueCatService.isConfigured()) {
         window.open(purchaseLink, '_blank');
@@ -303,7 +309,9 @@ export const RevenueCatProvider: React.FC<RevenueCatProviderProps> = ({
   const shouldUseDemoMode = enableDemoMode || DEMO_MODE;
 
   if (shouldUseDemoMode) {
-    console.log('[RevenueCat] Running in DEMO MODE - configure VITE_REVENUECAT_API_KEY for production');
+    if (import.meta.env.DEV) {
+      console.log('[RevenueCat] Running in DEMO MODE - configure VITE_REVENUECAT_API_KEY for production');
+    }
     return <DemoRevenueCatProvider>{children}</DemoRevenueCatProvider>;
   }
 
@@ -311,4 +319,3 @@ export const RevenueCatProvider: React.FC<RevenueCatProviderProps> = ({
 };
 
 export default RevenueCatProvider;
-

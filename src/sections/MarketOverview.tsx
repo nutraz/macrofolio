@@ -453,7 +453,9 @@ const MarketOverview: React.FC = () => {
     wsRef.current = ws;
 
     ws.onopen = () => {
-      console.log('WebSocket connected');
+      if (import.meta.env.DEV) {
+        console.log('WebSocket connected');
+      }
       setIsConnected(true);
       setLoading(false);
       // Fetch 24h data on connection
@@ -487,7 +489,9 @@ const MarketOverview: React.FC = () => {
     };
 
     ws.onclose = () => {
-      console.log('WebSocket closed');
+      if (import.meta.env.DEV) {
+        console.log('WebSocket closed');
+      }
       setIsConnected(false);
     };
 
@@ -588,4 +592,3 @@ const MarketOverview: React.FC = () => {
 };
 
 export default MarketOverview;
-

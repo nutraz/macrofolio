@@ -1,0 +1,7 @@
+SUPABASE_URL=https://hfecyfjkwkinriikolxw.supabase.co  # replace it to your actual 
+url from the previous response
+SUPABASE_KEY=5A8BQXbTtOSv34Cg   # you can get this by decoding JWT token in 
+Supbase dashboard or using libraries like '@postgraphile/client' for Node.js 
+REST_API_URL = sb_publishable_xrMFFQc2549jBQD1JJa2eA_-FOVuCfS # replace it with 
+your endpoint from the previous response   (replace 'sb:' to '' )
+PROJECT_NAME=MyProject 

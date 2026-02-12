@@ -65,13 +65,17 @@ class RevenueCatService {
     if (this.initialized) return;
 
     if (DEMO_MODE) {
-      console.log('[RevenueCat] Running in DEMO MODE');
+      if (import.meta.env.DEV) {
+        console.log('[RevenueCat] Running in DEMO MODE');
+      }
       this.initialized = true;
       return;
     }
 
     if (!REVENUECAT_API_KEY) {
-      console.log('[RevenueCat] No API key configured - running in demo mode');
+      if (import.meta.env.DEV) {
+        console.log('[RevenueCat] No API key configured - running in demo mode');
+      }
       this.initialized = true;
       return;
     }
@@ -85,7 +89,9 @@ class RevenueCatService {
         await this.nativePurchases.configure({
           apiKey: REVENUECAT_API_KEY
         });
-        console.log('[RevenueCat] Native SDK configured successfully');
+        if (import.meta.env.DEV) {
+          console.log('[RevenueCat] Native SDK configured successfully');
+        }
         
         // Set user ID if available
         const appUserId = localStorage.getItem('macrofolio_rc_user_id');
@@ -96,7 +102,9 @@ class RevenueCatService {
         console.error('Failed to initialize RevenueCat native SDK', e);
       }
     } else {
-      console.log('[RevenueCat] Web platform - using demo mode');
+      if (import.meta.env.DEV) {
+        console.log('[RevenueCat] Web platform - using demo mode');
+      }
     }
 
     this.initialized = true;
@@ -128,7 +136,9 @@ class RevenueCatService {
       }
     }
 
-    console.log('[RevenueCat] Using demo data');
+    if (import.meta.env.DEV) {
+      console.log('[RevenueCat] Using demo data');
+    }
     return this.getDemoCustomerInfo(appUserId || this.getOrCreateAppUserId());
   }
 
@@ -176,7 +186,9 @@ class RevenueCatService {
   // Purchase a product
   async purchaseProduct(productId: string): Promise<boolean> {
     if (DEMO_MODE) {
-      console.log('[Demo] Simulating purchase of:', productId);
+      if (import.meta.env.DEV) {
+        console.log('[Demo] Simulating purchase of:', productId);
+      }
       const userId = this.getOrCreateAppUserId();
       localStorage.setItem(`macrofolio_purchased_${productId}`, 'true');
       return true;
@@ -208,7 +220,9 @@ class RevenueCatService {
   // Restore purchases
   async restorePurchases(): Promise<boolean> {
     if (DEMO_MODE) {
-      console.log('[Demo] Simulating restore purchases');
+      if (import.meta.env.DEV) {
+        console.log('[Demo] Simulating restore purchases');
+      }
       return true;
     }
 

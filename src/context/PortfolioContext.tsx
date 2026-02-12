@@ -1,28 +1,13 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import type { PortfolioAsset, PortfolioContextSummary } from '../lib/types';
 
-// Asset type definition
-export interface Asset {
-  id: string;
-  name: string;
-  symbol: string;
-  type: 'stocks' | 'crypto' | 'gold' | 'real_estate' | 'fixed_income' | 'etf';
-  quantity: number;
-  currentPrice: number;
-  purchasePrice: number;
-  purchaseDate: string;
-  notes?: string;
-  isPremium?: boolean;
-}
+type Asset = PortfolioAsset;
+type PortfolioSummary = PortfolioContextSummary;
 
-// Portfolio summary
-export interface PortfolioSummary {
-  totalValue: number;
-  totalCost: number;
-  totalGain: number;
-  totalGainPercent: number;
-  dayChange: number;
-  dayChangePercent: number;
-}
+const DEMO_LOAD_DELAY_MS = 800;
+const PROD_LOAD_DELAY_MS = 500;
+const DAY_CHANGE_RANGE_PERCENT = 2; // -2% to +2%
+const PRICE_REFRESH_RANGE = 0.02; // -2% to +2%
 
 // Demo assets data
 const DEMO_ASSETS: Asset[] = [
@@ -136,11 +121,11 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({
       
       if (isDemoMode) {
         // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 800));
+        await new Promise(resolve => setTimeout(resolve, DEMO_LOAD_DELAY_MS));
         setAssets(DEMO_ASSETS);
       } else {
         // In production, load from Supabase
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, PROD_LOAD_DELAY_MS));
         setAssets([]);
       }
       
@@ -163,7 +148,7 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({
     const totalGainPercent = totalCost > 0 ? (totalGain / totalCost) * 100 : 0;
     
     // Simulate day change (random between -2% and +2%)
-    const dayChangePercent = (Math.random() * 4) - 2;
+    const dayChangePercent = (Math.random() * (DAY_CHANGE_RANGE_PERCENT * 2)) - DAY_CHANGE_RANGE_PERCENT;
     const dayChange = totalValue * (dayChangePercent / 100);
 
     setSummary({
@@ -197,7 +182,7 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({
   const refreshPrices = useCallback(async () => {
     // Simulate price refresh with random changes
     setAssets(prev => prev.map(asset => {
-      const change = (Math.random() * 0.04) - 0.02; // -2% to +2%
+      const change = (Math.random() * (PRICE_REFRESH_RANGE * 2)) - PRICE_REFRESH_RANGE;
       const newPrice = asset.currentPrice * (1 + change);
       return { ...asset, currentPrice: newPrice };
     }));
@@ -222,4 +207,3 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({
 };
 
 export default PortfolioProvider;
-

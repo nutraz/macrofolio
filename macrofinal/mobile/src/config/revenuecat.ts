@@ -1,15 +1,96 @@
-import { Platform } from 'react-native';
+/**
+ * Mock RevenueCat Configuration for Development
+ * 
+ * This file provides mock implementations for RevenueCat functionality
+ * during development. It allows the app to run without actual RevenueCat API keys.
+ * 
+ * For production:
+ * 1. Install: npm install react-native-purchases
+ * 2. Set up actual API keys in .env
+ * 3. Replace this mock with real RevenueCat implementation
+ */
 
-// RevenueCat SDK keys are "public" keys used in the client SDK.
-// Set these to your project keys from the RevenueCat dashboard.
-export const REVENUECAT_IOS_API_KEY = '';
-export const REVENUECAT_ANDROID_API_KEY = '';
+// Mock RevenueCat configuration
+export const revenueCatConfig = {
+  REVENUECAT_ANDROID_API_KEY: 'mock_dev_key',
+  REVENUECAT_IOS_API_KEY: 'mock_dev_key',
+};
 
-// Must match your RevenueCat Entitlement Identifier.
-export const REVENUECAT_ENTITLEMENT_ID = 'premium';
-
-export function getRevenueCatApiKey(): string {
-  if (Platform.OS === 'ios') return REVENUECAT_IOS_API_KEY;
-  return REVENUECAT_ANDROID_API_KEY;
+/**
+ * Mock hook that simulates RevenueCat behavior
+ * Always returns premium = true for development
+ */
+export function useRevenueCat() {
+  return {
+    // Always premium in development
+    isPremium: true,
+    
+    // No loading needed in mock
+    loading: false,
+    
+    // Mock customer info with active premium entitlement
+    customerInfo: {
+      entitlements: {
+        active: {
+          premium: {
+            identifier: 'premium_monthly',
+            isActive: true,
+            expiresDate: null,
+            productIdentifier: 'premium_monthly',
+            purchaseDate: new Date().toISOString(),
+          },
+        },
+      },
+      originalAppUserId: 'mock-user-123',
+      allExpirationDatesMillis: {},
+      allPurchaseDatesMillis: {},
+      activeSubscriptions: ['premium_monthly'],
+      nonConsumablePurchases: [],
+      latestExpirationDate: null,
+    },
+    
+    // Empty products array for development
+    products: [],
+    
+    // Mock purchase function
+    purchasePackage: async () => {
+      console.log('[revenuecat] Mock purchase called');
+      return {
+        customerInfo: {
+          entitlements: {
+            active: {
+              premium: {
+                identifier: 'premium_monthly',
+                isActive: true,
+              },
+            },
+          },
+        },
+      };
+    },
+    
+    // Mock restore function
+    restorePurchases: async () => {
+      console.log('[revenuecat] Mock restore called');
+      return {
+        customerInfo: {
+          entitlements: {
+            active: {
+              premium: {
+                identifier: 'premium_monthly',
+                isActive: true,
+              },
+            },
+          },
+        },
+      };
+    },
+  };
 }
+
+/**
+ * Check if RevenueCat is properly configured
+ * In mock mode, always returns false (using mock)
+ */
+export const isRevenueCatConfigured = false; // Mock mode
 

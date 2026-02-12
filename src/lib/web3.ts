@@ -108,7 +108,7 @@ class Web3Service {
     this.signer = null;
     this.contract = null;
     this.currentNetwork = null;
-    this.cachedDomainSeparator = null;
+    this._cachedDomainSeparator = null;
   }
 
   /**
@@ -329,7 +329,8 @@ class Web3Service {
       throw new Error('Web3 not initialized');
     }
     const address = await this.signer.getAddress();
-    return await this.contract.getAnchorCount(address);
+    const count: bigint = await this.contract.getAnchorCount(address);
+    return Number(count);
   }
 
   /**
@@ -340,7 +341,8 @@ class Web3Service {
       throw new Error('Web3 not initialized');
     }
     const address = await this.signer.getAddress();
-    return await this.contract.getRemainingQuota(address);
+    const remaining: bigint = await this.contract.getRemainingQuota(address);
+    return Number(remaining);
   }
 
   /**
@@ -351,7 +353,8 @@ class Web3Service {
       throw new Error('Web3 not initialized');
     }
     const address = await this.signer.getAddress();
-    return await this.contract.getNextAnchorTime(address);
+    const next: bigint = await this.contract.getNextAnchorTime(address);
+    return Number(next);
   }
 
   /**
@@ -386,4 +389,3 @@ class Web3Service {
 
 export const web3Service = new Web3Service();
 export default web3Service;
-

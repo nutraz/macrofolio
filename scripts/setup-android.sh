@@ -9,6 +9,15 @@ set -e
 
 echo "🚀 Setting up Android build environment for Macrofolio..."
 
+# Resolve repo root and key paths (script may be run from any CWD)
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+if command -v git >/dev/null 2>&1 && git -C "$SCRIPT_DIR" rev-parse --show-toplevel >/dev/null 2>&1; then
+    REPO_ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
+else
+    REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
+fi
+ASSETS_DIR="$REPO_ROOT/macrofolio/src/macrofolio_assets"
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -42,15 +51,15 @@ fi
 # ============================================
 echo ""
 echo "🔑 Configuring RevenueCat..."
-read -p "Enter your RevenueCat Public SDK Key (starts with pub_): " RC_KEY
+	read -p "Enter your RevenueCat Public SDK Key (starts with pub_): " RC_KEY
 
-# Create .env.local
-cat > macrofolio/src/macrofolio_assets/.env.local << EOF
+	# Create .env.local
+	cat > "$ASSETS_DIR/.env.local" << EOF
 VITE_REVENUECAT_API_KEY=$RC_KEY
 VITE_DEMO_MODE=false
 EOF
 
-echo "✅ Created .env.local with RevenueCat key"
+	echo "✅ Created .env.local with RevenueCat key"
 
 # ============================================
 # Step 3: Install Android SDK
@@ -106,7 +115,7 @@ echo "✅ Android SDK packages installed"
 echo ""
 echo "🔨 Building Macrofolio Android app..."
 
-cd /home/nutrazz/Projects/Macrofolio-clean/macrofolio/src/macrofolio_assets
+cd "$ASSETS_DIR"
 
 # Install npm dependencies
 echo "Installing npm dependencies..."
@@ -126,7 +135,7 @@ echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
 # Build APK
 cd android
 echo "Building APK..."
-./gradlew clean assembleDebug --no-daemon --quiet
+./gradlew clean assembleDebug --quiet
 
 # ============================================
 # Step 6: Success!
@@ -153,4 +162,3 @@ else
     echo -e "${RED}❌ Build failed. Check errors above.${NC}"
     exit 1
 fi
-

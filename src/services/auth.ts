@@ -8,7 +8,9 @@ export const DemoAuth = {
       email,
       name: 'Demo Investor'
     };
-    console.log('Demo user logged in:', this.currentUser.email);
+    if (import.meta.env.DEV) {
+      console.log('Demo user logged in:', this.currentUser.email);
+    }
     return { user: this.currentUser, error: null };
   },
 

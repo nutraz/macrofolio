@@ -7,6 +7,15 @@
 
 echo "🔧 Setting up environment..."
 
+# Resolve repo root and key paths (script may be run from any CWD)
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+if command -v git >/dev/null 2>&1 && git -C "$SCRIPT_DIR" rev-parse --show-toplevel >/dev/null 2>&1; then
+    REPO_ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
+else
+    REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
+fi
+ASSETS_DIR="$REPO_ROOT/macrofolio/src/macrofolio_assets"
+
 # Find Java
 if command -v java &> /dev/null; then
     export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
@@ -36,14 +45,14 @@ echo "✅ SDK packages installed"
 
 # Build the project
 echo "🔨 Building Macrofolio Android app..."
-cd /home/nutrazz/Projects/Macrofolio-clean/macrofolio/src/macrofolio_assets
+cd "$ASSETS_DIR"
 
 # Create local.properties
 echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
 
 # Build
 cd android
-./gradlew clean assembleDebug --no-daemon
+./gradlew clean assembleDebug
 
 # Check result
 if [ -f "app/build/outputs/apk/debug/app-debug.apk" ]; then
@@ -57,4 +66,3 @@ else
     echo ""
     echo "❌ Build failed. Check errors above."
 fi
-

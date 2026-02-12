@@ -75,6 +75,37 @@ export interface PortfolioSummary {
   assetsByType: Record<AssetType, number>;
 }
 
+// UI/Demo Portfolio Types (local-only data model)
+export type PortfolioAssetType =
+  | 'stocks'
+  | 'crypto'
+  | 'gold'
+  | 'real_estate'
+  | 'fixed_income'
+  | 'etf';
+
+export interface PortfolioAsset {
+  id: string;
+  name: string;
+  symbol: string;
+  type: PortfolioAssetType;
+  quantity: number;
+  currentPrice: number;
+  purchasePrice: number;
+  purchaseDate: string;
+  notes?: string;
+  isPremium?: boolean;
+}
+
+export interface PortfolioContextSummary {
+  totalValue: number;
+  totalCost: number;
+  totalGain: number;
+  totalGainPercent: number;
+  dayChange: number;
+  dayChangePercent: number;
+}
+
 // Web3 Types (EVM/MetaMask)
 export interface WalletState {
   isConnected: boolean;
@@ -139,4 +170,3 @@ export interface DemoAsset {
   value: number;
   change24h: number;
 }
-

@@ -1,7 +1,7 @@
 export const AUTH_PROVIDERS = {
   email: true,
   google: true,
-  facebook: true,
+  facebook: false,
   discord: true,
   x: true,
 

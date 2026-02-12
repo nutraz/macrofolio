@@ -1,6 +1,10 @@
 #!/bin/bash
 echo "🔧 Fixing Java for Android build..."
-export ANDROID_HOME="/home/nutrazz/Android/sdk"
+
+# Prefer existing environment vars; fall back to common SDK locations
+: "${ANDROID_SDK_ROOT:="${ANDROID_HOME:-$HOME/Android/Sdk}"}"
+: "${ANDROID_HOME:="$ANDROID_SDK_ROOT"}"
+export ANDROID_HOME ANDROID_SDK_ROOT
 
 # --- BEGIN Java installation and configuration (COMMENTED OUT) ---
 # # Install Java 17
@@ -35,9 +39,18 @@ export ANDROID_HOME="/home/nutrazz/Android/sdk"
 # --- END Java installation and configuration (COMMENTED OUT) ---
 
 
-# Ensure JAVA_HOME is set for this execution, in case the previous export didn't persist
-export JAVA_HOME="/usr/lib/jvm/jdk-17.0.11+9"
-export PATH="$JAVA_HOME/bin:$PATH"
+# Ensure JAVA_HOME is set for this execution
+if [ -z "${JAVA_HOME:-}" ]; then
+    if command -v java >/dev/null 2>&1; then
+        JAVA_BIN="$(command -v java)"
+        JAVA_HOME="$(dirname "$(dirname "$(readlink -f "$JAVA_BIN")")")"
+        export JAVA_HOME
+    fi
+fi
+
+if [ -n "${JAVA_HOME:-}" ]; then
+    export PATH="$JAVA_HOME/bin:$PATH"
+fi
 
 echo "✅ Java 17 configuration confirmed for current script execution."
 echo "JAVA_HOME: $JAVA_HOME"

@@ -7,7 +7,9 @@ export const initRevenueCat = async () => {
   try {
     Purchases.setDebugLogsEnabled(true);
     await Purchases.configure({ apiKey: REVENUECAT_API_KEY });
-    console.log('✅ RevenueCat initialized');
+    if (import.meta.env.DEV) {
+      console.log('✅ RevenueCat initialized');
+    }
     return true;
   } catch (error) {
     console.error('❌ RevenueCat init error:', error);
@@ -19,7 +21,9 @@ export const checkPremiumStatus = async () => {
   try {
     const customerInfo = await Purchases.getCustomerInfo();
     const isPremium = customerInfo.entitlements.active?.premium !== undefined;
-    console.log('Premium status:', isPremium);
+    if (import.meta.env.DEV) {
+      console.log('Premium status:', isPremium);
+    }
     return isPremium;
   } catch (error) {
     console.error('Error checking premium:', error);
